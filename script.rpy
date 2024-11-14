@@ -76,6 +76,7 @@ default  stat_fir = 0
 default event1 = True
 default event2 = True
 default event3 = True
+default event4 = True
 default eventstar = True
 
 default  stat_star = 0
@@ -100,6 +101,7 @@ label room_events_reset:
     $ event1 = True
     $ event2 = True
     $ event3 = True
+    $ event4 = True
     $ eventstar = True
     return
 # DICE ROLLS
@@ -132,26 +134,24 @@ label roll_lck:
     else:
         $ success = False
     return
-# DEATH CHECK
-##############################################################
-label death_check:
-    if stat_hlt <= 0:
-        jump gameover
-    if stat_snt <= 0:
-        jump gameover
-    else:
-        return
+
 # HEALTH LOSS
 ##############################################################
 label hlt_loss:
     play audio "sfx/sfx_health_01.mp3"
+    pause 0.1
+    play audio "sfx/sfx_hurt_01.mp3"
     if stat_hlt < 0:
             $stat_hlt = 0
+    if stat_hlt <= 0:
+        jump gameover
     return
 label snt_loss:
     play audio "sfx/sfx_sanity_01.mp3"
     if stat_snt < 0:
             $stat_snt = 0
+    if stat_snt <= 0:
+        jump gameover
     return
 label choice_selected:
     play audio "sfx/sfx_ui_click_01.mp3"
@@ -329,30 +329,29 @@ label star_found_01:
     $ eventstar = False
     $ stat_star += 1
     jump room_01_interact
-
+############################
 label first_window:
     play audio "sfx/sfx_wood_creak_01.mp3"
     $ event1 = False
     show mc backr:
         xpos 0.32
         ypos 0.26
-
     with dissolve
-
     "WINDOW" "You look outside. \n\n It looks like you've been brought into the {b}{color=[txt_colo_01]} abandoned high school{/b}{/color}. \n\n
     The window seems to be jammed, and anyway, you're too high up to jump. \n\n You'll have to find another way out."
     jump room_01_interact
-
+###############################
 label bloodstain_01:
     $ event2 = False
     show mc frontl:
         xpos 0.15
         ypos 0.4
     with dissolve
-    call snt_loss
-    $ stat_snt -=1
     "STAIN ON THE FLOOR" "Is that... {b}{color=[txt_colo_01]}blood{/b}{/color}? {b}{color=[snt_colo_01]} -1 {image=icon_snt} {/b}{/color}"
+    $ stat_snt -=1
+    call snt_loss
     jump room_01_interact
+################################
 label calendar_01:
     $ event3 = False
     show mc backr:
@@ -431,6 +430,7 @@ screen room_02_interact:
         action Jump("teacherlounge_01")
         hover_sound "sfx/sfx_ui_hover_01.mp3"
         activate_sound "sfx/sfx_ui_select_01.mp3"
+#############################
 label blackboard_poetry:
     $ event1 = False
     show mc backr:
@@ -440,7 +440,7 @@ label blackboard_poetry:
     "BLACK BOARD""A writing in chalk. \n\n {i}{color=[txt_colo_01]}The dogs have eaten all the flowers.
      \n If we eat the dogs, will we taste the flowers?{/i}{/color} \n\n Poetry, perhaps? In any case, it doesn't seem to make any sense."
     jump room_02_interact
-
+#########################
 label plants_01:
     play audio "sfx/sfx_pot_01.mp3"
     $ event3 = False
@@ -450,8 +450,8 @@ label plants_01:
     with dissolve
     "POTTED PLANTS""The last known inhabitants fled the town {b}{color=[txt_colo_01]} over 12 years ago{/b}{/color}. \n\n No wonder the plants are dead."
     jump room_02_interact
+########################
 label table_01:
-
     $ event2 = False
     show mc frontr at entrance_slot_01
     with dissolve
@@ -517,11 +517,20 @@ screen room_03_interact:
             activate_sound "sfx/sfx_ui_select_01.mp3"
     if event3 == True:
         imagebutton:
-            xpos 0.525
-            ypos 0.33
+            xpos 0.475
+            ypos 0.55
             idle "ui/ui_interact_idle.png"
             hover "ui/ui_interact_hover.png"
             action Jump("lostkey_01")
+            hover_sound "sfx/sfx_ui_hover_01.mp3"
+            activate_sound "sfx/sfx_ui_select_01.mp3"
+    if event4 == True:
+        imagebutton:
+            xpos 0.38
+            ypos 0.25
+            idle "ui/ui_interact_idle.png"
+            hover "ui/ui_interact_hover.png"
+            action Jump("photo_01")
             hover_sound "sfx/sfx_ui_hover_01.mp3"
             activate_sound "sfx/sfx_ui_select_01.mp3"
     imagebutton:
@@ -532,7 +541,7 @@ screen room_03_interact:
         action Jump("classroom_01")
         hover_sound "sfx/sfx_ui_hover_01.mp3"
         activate_sound "sfx/sfx_ui_select_01.mp3"
-#########################################################
+#################################
 label newspapers_01:
     $ event2 = False
     show mc backr:
@@ -558,17 +567,28 @@ label newspaper_comet:
 \n\nThe local authorities are already busy retrieving the object.
 {/i}{/color}"
     jump room_03_interact
-
+#################################
 label lostkey_01:
     play audio "sfx/sfx_pot_01.mp3"
     $ event3 = False
-    show mc frontr:
-        xpos 0.36
-        ypos 0.3
+    show mc backr:
+        xpos 0.38
+        ypos 0.42
     hide mcreflection
     with dissolve
-    "POTTED PLANTS""The last known inhabitants fled the town {b}{color=[txt_colo_01]} over 12 years ago{/b}{/color}. \n\n No wonder the plants are dead."
-    jump room_02_interact
+menu:
+    "LOST KEY""A {b}{color=[txt_colo_01]} key{/b}{/color} has fallen between the furnitures, but the gap is filled with pieces of {b}{color=[txt_colo_01]} broken glass{/b}{/color} and {b}{color=[txt_colo_01]} splinters of wood{/b}{/color}."
+    "Ignore.":
+        call choice_selected
+        jump room_03_interact
+    "Take the key. {b}{color=[hlt_colo_01]}-3 {image=icon_hlt} {/b}{/color}{b}{color=[key_colo_01]} +1 {image=icon_key} {/b}{/color}":
+        call choice_selected
+        $ stat_hlt -=3
+        $ stat_key +=1
+        call hlt_loss
+        pause 0.2
+        play audio "sfx/sfx_key_01.mp3"
+        jump room_03_interact
 #########################################################
 label mirror_01:
     $ event1 = False
@@ -614,7 +634,27 @@ menu:
         $ stat_lck +=1
         call stat_increase
         jump room_03_interact
-
+#########################################################
+label photo_01:
+    $ event4 = False
+    show mc backr:
+        xpos 0.27
+        ypos 0.3
+    hide mcreflection
+    with dissolve
+menu:
+    "FRAMED PHOTOGRAPHS""Photos of school staff hang on the wall. \n\n One of the frames has fallen to the floor."
+    "Ignore":
+        call choice_selected
+        jump room_03_interact
+    "Inspect":
+        call choice_selected
+        "A CLASS PHOTO""The students pose in front of the school. \n You're struck by the appearance of many of them.
+         \n\n Their eyes are {b}{color=[txt_colo_01]}bulging and piercingly blue{/b}{/color}. They look both exhausted and {b}{color=[txt_colo_01]}unnaturally agitated.{/b}{/color}
+         \n\n This is very unsettling. {b}{color=[snt_colo_01]} -1 {image=icon_snt} {/b}{/color} "
+        $ stat_snt -= 1
+        call snt_loss
+        jump room_03_interact
 
 # DEATH
 ##############################################################
