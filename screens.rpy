@@ -140,6 +140,25 @@ screen stats_UI:
 style statsui_text:
     size 24
 
+screen stat_overlay_01:
+    add "ui/ui_stat_screen_overlay_03.png":
+        xanchor 0.0
+        yanchor 1.0
+        xpos 10
+        ypos 1080
+
+screen stat_overlay_hlt:
+    add "ui/ui_stat_screen_overlay_01.png":
+        xanchor 0.0
+        yanchor 1.0
+        xpos 10
+        ypos 1080
+screen stat_overlay_snt:
+    add "ui/ui_stat_screen_overlay_02.png":
+        xanchor 0.0
+        yanchor 1.0
+        xpos 10
+        ypos 1080
 
 ## Say screen ##################################################################
 ##
@@ -201,7 +220,7 @@ style namebox:
     xpos 1530
     xanchor gui.name_xalign
     xsize gui.namebox_width
-    ypos -730
+    ypos -738
     ysize gui.namebox_height
 
     background Frame("gui/namebox.png", gui.namebox_borders, tile=gui.namebox_tile, xalign=gui.name_xalign)

@@ -4,9 +4,9 @@
 ###AUDIO  ##########################################
 init python:
     renpy.music.register_channel('ambiance', "music")
-define config.default_music_volume = 0.75
-define config.default_sfx_volume = 0.75
-define config.default_voice_volume = 0.75
+define config.default_music_volume = 0.85
+define config.default_sfx_volume = 0.85
+define config.default_voice_volume = 0.85
 
 ###IMAGE DEFINE ##########################################
 #backgrounds
@@ -49,6 +49,7 @@ image icon_hlt = "ui/icon_01.png"
 image icon_snt = "ui/icon_02.png"
 image icon_key = "ui/icon_03.png"
 image icon_fir = "ui/icon_04.png"
+
 #
 default txt_colo_01 = "#ffad5a"
 default check_colo_01 = "#a99e94"
@@ -141,6 +142,10 @@ label hlt_loss:
     play audio "sfx/sfx_health_01.mp3"
     pause 0.1
     play audio "sfx/sfx_hurt_01.mp3"
+    show screen stat_overlay_hlt
+    pause 0.01
+    hide screen stat_overlay_hlt
+    with Dissolve(0.5)
     if stat_hlt < 0:
             $stat_hlt = 0
     if stat_hlt <= 0:
@@ -148,6 +153,10 @@ label hlt_loss:
     return
 label snt_loss:
     play audio "sfx/sfx_sanity_01.mp3"
+    show screen stat_overlay_snt
+    pause 0.01
+    hide screen stat_overlay_snt
+    with Dissolve(0.5)
     if stat_snt < 0:
             $stat_snt = 0
     if stat_snt <= 0:
@@ -159,7 +168,18 @@ label choice_selected:
 
 label stat_increase:
     play audio "sfx/sfx_stat_increase_01.mp3"
+    show screen stat_overlay_01
+    pause 0.01
+    hide screen stat_overlay_01
+    with Dissolve(0.5)
     return
+
+label star_found:
+    play audio "sfx/sfx_ui_star_01.mp3"
+    $ eventstar = False
+    $ stat_star += 1
+    return
+
 ##################################################################
 ##################################################################
 
@@ -236,9 +256,10 @@ label firstroom_01:
 label wakingup_01:
     play ambiance "sfx/amb_tension_02.mp3"
 menu:
-    "WAKING UP" "You wake up on the cold floor of an unfamiliar room.
+    "WAKING UP" "You wake up on the cold floor of an unfamiliar room.\n
     Your hands and feet are {b}{color=[txt_colo_01]}bound with rope{/b}{/color}.
-    \n\n The last thing you remember: you were visiting the mysterious ghost town of {b}{color=[txt_colo_01]}Dog Valley{/b}{/color} for your article, trying to understand its sudden abandonment by the population.
+    \n\n The last thing you remember: you were visiting the {b}{color=[txt_colo_01]}mysterious ghost town {/b}{/color} for your article,
+     trying to understand its sudden abandonment by the population. \n\n
     You were close to the old school, and then... you don't remember a thing. \n\n Anyway, you'd better escape fast."
     "Break the ties.":
         call choice_selected
@@ -273,7 +294,7 @@ label wakingup_02:
     with dissolve
 menu:
     "TIP" "You can leave a room whenever you like. \n But staying and looking around might {b}{color=[txt_colo_01]}reveal things. {/b}{/color}
-    \n\n Maybe uncover some of the {b}{color=[txt_colo_01]}secrets {/b}{/color} that led Dog Valley to become a ghost town in the first place. \n\n That was your original reason for coming, after all...
+    \n\n Maybe uncover some of the {b}{color=[txt_colo_01]}secrets {/b}{/color} that led this place to become a ghost town in the first place. \n\n That was your original reason for coming, after all...
     \n\n But is it worth the risk? You can't lose all your {b}{color=[hlt_colo_01]}health{image=icon_hlt} {/b}{/color} or {b}{color=[snt_colo_01]}sanity{image=icon_snt}{/b}{/color}..."
     "Got it.":
         call choice_selected
@@ -326,8 +347,7 @@ screen room_01_interact:
         hover_sound "sfx/sfx_ui_hover_01.mp3"
         activate_sound "sfx/sfx_ui_select_01.mp3"
 label star_found_01:
-    $ eventstar = False
-    $ stat_star += 1
+    call star_found
     jump room_01_interact
 ############################
 label first_window:
@@ -493,7 +513,7 @@ label teacherlounge_01:
     $ stat_snt -= 2
     call snt_loss
     jump room_03_interact
-
+#####
 label room_03_interact:
     call screen room_03_interact
 screen room_03_interact:
@@ -562,7 +582,7 @@ label newspaper_comet:
     play audio "sfx/sfx_paper_01.mp3"
     "THE SKY IS FALLING!""{i} (30 years ago.) {/i} \n\n
 {i}{color=[txt_colo_01]}Last night, around 4 a.m., you were probably awakened by the sound of a loud explosion.
-\n\n It wasn't an enemy air raid, but a comet that fell right here in Dog Valley!
+\n\n It wasn't an enemy air raid, but a comet that fell right here in our valley!
 \n Fortunately, it landed in a field, and no human or animal lives were lost.
 \n\nThe local authorities are already busy retrieving the object.
 {/i}{/color}"
@@ -583,8 +603,8 @@ menu:
         jump room_03_interact
     "Take the key. {b}{color=[hlt_colo_01]}-3 {image=icon_hlt} {/b}{/color}{b}{color=[key_colo_01]} +1 {image=icon_key} {/b}{/color}":
         call choice_selected
-        $ stat_hlt -=3
         $ stat_key +=1
+        $ stat_hlt -=3
         call hlt_loss
         pause 0.2
         play audio "sfx/sfx_key_01.mp3"
