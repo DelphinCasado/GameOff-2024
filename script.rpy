@@ -1,5 +1,5 @@
 ﻿
-#define e = Character("OLD BOOKCASE")
+define a = Character("VINCENT")
 
 ###AUDIO  ##########################################
 init python:
@@ -13,7 +13,15 @@ define config.default_voice_volume = 0.85
 image bgroom_01 = "bg/bg_room_01.png"
 image bgclassroom = "bg/bg_classroom_01.png"
 image bgteacherlounge = "bg/bg_teacherlounge_01.png"
+image bgcouselor_A = "bg/bg_counselor_A_01.png"
+image bgcouselor_B = "bg/bg_counselor_B_01.png"
+
+image bgflower_01 = "bg/bg_flowerfield_A_01.png"
+image bgwhite = "bg/bg_white_01.png"
+
+
 image bgmovie = Movie(size=(1920,1080), play="images/movies/grainy_background_01.webm")
+
 
 #characters
  ############################################################################
@@ -146,10 +154,6 @@ label hlt_loss:
     pause 0.01
     hide screen stat_overlay_hlt
     with Dissolve(0.5)
-    if stat_hlt < 0:
-            $stat_hlt = 0
-    if stat_hlt <= 0:
-        jump gameover
     return
 label snt_loss:
     play audio "sfx/sfx_sanity_01.mp3"
@@ -157,9 +161,15 @@ label snt_loss:
     pause 0.01
     hide screen stat_overlay_snt
     with Dissolve(0.5)
+    return
+label death_check:
     if stat_snt < 0:
             $stat_snt = 0
     if stat_snt <= 0:
+        jump gameover
+    if stat_hlt < 0:
+            $stat_hlt = 0
+    if stat_hlt <= 0:
         jump gameover
     return
 label choice_selected:
@@ -267,12 +277,12 @@ menu:
         if success == True:
             "{color=[check_colo_01]} Strength check: Success. {/color}\n\n Focusing all your strength, you break your bonds and set yourself free."
         else:
-            call hlt_loss
-            $ stat_hlt -= 4
             "{color=[check_colo_01]} Strength check: Failure. {/color}\n\n You struggle for several minutes to break the rope.
             \n\n You finally free yourself, but your wrists are bloody and sore.
             {b}{color=[hlt_colo_01]}-4 {image=icon_hlt} {/b}{/color}"
-
+            call hlt_loss
+            $ stat_hlt -= 4
+            call death_check
         jump wakingup_02
     "Untie the knots":
         call choice_selected
@@ -280,10 +290,11 @@ menu:
         if success == True:
             "{color=[check_colo_01]} Dexterity check: Success. {/color}\n\n Using all your dexterity, you manage to undo the ropes around your wrists, then your ankles."
         else:
-            call snt_loss
-            $ stat_snt -= 4
             "{color=[check_colo_01]} Dexterity check: Failure. {/color}\n\n You spend long minutes wrestling with the knots, your stress mounting with the fear of never freeing yourself.\n\n Eventually, you manage to do it, but your mental state has taken a hit.
             {b}{color=[snt_colo_01]}-4 {image=icon_snt} {/b}{/color}"
+            call snt_loss
+            $ stat_snt -= 4
+            call death_check
         jump wakingup_02
 label wakingup_02:
     stop ambiance fadeout 2
@@ -301,7 +312,6 @@ menu:
         play music "mus/mus_exploration_02.mp3"
         jump room_01_interact
 label room_01_interact:
-
     call screen room_01_interact
 screen room_01_interact:
     if event1 == True:
@@ -370,6 +380,7 @@ label bloodstain_01:
     "STAIN ON THE FLOOR" "Is that... {b}{color=[txt_colo_01]}blood{/b}{/color}? {b}{color=[snt_colo_01]} -1 {image=icon_snt} {/b}{/color}"
     $ stat_snt -=1
     call snt_loss
+    call death_check
     jump room_01_interact
 ################################
 label calendar_01:
@@ -476,7 +487,7 @@ label table_01:
     show mc frontr at entrance_slot_01
     with dissolve
 menu:
-    "DESK & STOOLS""Standard furniture for a school of the {b}{color=[txt_colo_01]}Empire{/b}{/color}.
+    "DESK & STOOLS""Standard furniture for a school.
     \n\n It brings back memories of your own studies in the capital."
     "Ignore":
         call choice_selected
@@ -512,6 +523,7 @@ label teacherlounge_01:
     "You arrive in the teachers' lounge. \n\n The moldy smell of the carpet is nauseating. {b}{color=[snt_colo_01]} -2 {image=icon_snt} {/b}{/color}"
     $ stat_snt -= 2
     call snt_loss
+    call death_check
     jump room_03_interact
 #####
 label room_03_interact:
@@ -558,7 +570,7 @@ screen room_03_interact:
         ypos 0.74
         idle "ui/ui_exit_idle.png"
         hover "ui/ui_exit_hover.png"
-        action Jump("classroom_01")
+        action Jump("counselor_office_01")
         hover_sound "sfx/sfx_ui_hover_01.mp3"
         activate_sound "sfx/sfx_ui_select_01.mp3"
 #################################
@@ -606,6 +618,7 @@ menu:
         $ stat_key +=1
         $ stat_hlt -=3
         call hlt_loss
+        call death_check
         pause 0.2
         play audio "sfx/sfx_key_01.mp3"
         jump room_03_interact
@@ -674,8 +687,287 @@ menu:
          \n\n This is very unsettling. {b}{color=[snt_colo_01]} -1 {image=icon_snt} {/b}{/color} "
         $ stat_snt -= 1
         call snt_loss
+        call death_check
         jump room_03_interact
 
+#############################################################################################
+# ROOM 04
+#############################################################################################
+label counselor_office_01:
+    scene black
+    with fade
+    call room_events_reset
+    scene bgmovie
+    stop ambiance fadeout 2
+    play music "mus/mus_exploration_02.mp3"
+    show bgcouselor_A zorder 0
+    show bgcouselor_B zorder 10
+    show mc backr zorder 15:
+        xpos 0.242
+        ypos 0.6
+    with Dissolve(2)
+    "You arrive in a counselor's office"
+    jump room_04_interact
+#####
+label room_04_interact:
+    call screen room_04_interact
+screen room_04_interact:
+    if event1 == True:
+        imagebutton:
+            xpos 0.4
+            ypos 0.55
+            idle "ui/ui_interact_idle.png"
+            hover "ui/ui_interact_hover.png"
+            action Jump("cigarette_case_01")
+            hover_sound "sfx/sfx_ui_hover_01.mp3"
+            activate_sound "sfx/sfx_ui_select_01.mp3"
+    if event2 == True:
+        imagebutton:
+            xpos 0.48
+            ypos 0.4
+            idle "ui/ui_interact_idle.png"
+            hover "ui/ui_interact_hover.png"
+            action Jump("note_01")
+            hover_sound "sfx/sfx_ui_hover_01.mp3"
+            activate_sound "sfx/sfx_ui_select_01.mp3"
+    if event3 == True:
+        imagebutton:
+            xpos 0.335
+            ypos 0.4
+            idle "ui/ui_interact_idle.png"
+            hover "ui/ui_interact_hover.png"
+            action Jump("bloodstain_02")
+            hover_sound "sfx/sfx_ui_hover_01.mp3"
+            activate_sound "sfx/sfx_ui_select_01.mp3"
+    if event4 == True:
+        imagebutton:
+            xpos 0.225
+            ypos 0.67
+            idle "ui/ui_interact_idle.png"
+            hover "ui/ui_interact_hover.png"
+            action Jump("locked_01")
+            hover_sound "sfx/sfx_ui_hover_01.mp3"
+            activate_sound "sfx/sfx_ui_select_01.mp3"
+    imagebutton:
+        xpos 0.47
+        ypos 0.74
+        idle "ui/ui_exit_idle.png"
+        hover "ui/ui_exit_hover.png"
+        action Jump("flower_field_01")
+        hover_sound "sfx/sfx_ui_hover_01.mp3"
+        activate_sound "sfx/sfx_ui_select_01.mp3"
+#################################
+label cigarette_case_01:
+    $ event1 = False
+    show mc frontl zorder 5:
+        xpos 0.377
+        ypos 0.39
+    with dissolve
+    play audio "sfx/sfx_wood_open_01.mp3"
+menu:
+    "CIGARETTE CASE""In the desk drawer, you find a small, finely decorated metal box containing a few cigarettes and a match."
+    "Smoke a cigarette.":
+        play audio "sfx/sfx_match_use_01.mp3"
+        call roll_lck
+        if success == True:
+            "{color=[check_colo_01]} Luck check: Success. {/color}\n\n
+            It relaxes you… {b}{color=[snt_colo_01]} +3 {image=icon_snt} {/b}{/color}"
+            $ stat_snt +=3
+            jump room_04_interact
+        else:
+            "{color=[check_colo_01]} Luck check: Failure.{/color}\n\n
+            How disgusting! \n\n The tobacco must have molded, and made you nauseous.
+            {b}{color=[hlt_colo_01]} -2 {image=icon_hlt} {/b}{/color}"
+            $ stat_hlt -= 4
+            call hlt_loss
+            call death_check
+            jump room_04_interact
+
+    "Take the match.":
+        play audio "sfx/sfx_match_pick_01.mp3"
+        $ stat_fir += 1
+        jump room_04_interact
+
+#################################
+label note_01:
+    play audio "sfx/sfx_pot_01.mp3"
+    $ event2 = False
+    show mc backr zorder 5:
+        xpos 0.4
+        ypos 0.41
+    with dissolve
+menu:
+    "A NOTE""A note, adressed to the school's principal."
+    "Ignore":
+        call choice_selected
+        jump room_04_interact
+    "Read":
+        call choice_selected
+        jump note_read_01
+label note_read_01:
+    play audio "sfx/sfx_paper_01.mp3"
+    "NOTE TO THE PRINCIPAL""{i}{color=[txt_colo_01]} Mr Leclaire \n\n The problem of the blue flowers is getting worse. More and more students are using them. \n\n
+    They drink them as infusions, or chew the petals like gum. Some have started selling them, for absurd sums of money.
+    \n\n I don't care if grades are up, I'm afraid you're underestimating the side effects
+{/i}{/color}"
+    jump room_04_interact
+#########################################################
+label bloodstain_02:
+    $ event3 = False
+    show mc backr zorder 5:
+        xpos 0.25
+        ypos 0.3
+    with dissolve
+    "STAIN ON THE FLOOR" "Is that... {b}{color=[txt_colo_01]}blood{/b}{/color}? {b}{color=[snt_colo_01]} -1 {image=icon_snt} {/b}{/color}"
+    $ stat_snt -=1
+    call snt_loss
+    call death_check
+    jump room_04_interact
+#########################################################
+label locked_01:
+    $ event4 = False
+    show mc backl zorder 15:
+        xpos 0.2
+        ypos 0.55
+    with dissolve
+menu:
+    "LOCKED""It's locked."
+    "Ignore":
+        call choice_selected
+        jump room_04_interact
+    "Use a key" if stat_key >=0:
+        $ stat_key -= 1
+        jump room_04_interact
+
+#############################################################################################
+# FLOWER FIELD
+#############################################################################################
+label flower_field_01:
+    scene bgflower_01
+    show mc backr at entrance_slot_01
+    show bgwhite
+    with Dissolve(2)
+    call room_events_reset
+    "You remain blind for a long time, blinded by the surrounding light. \n\n
+    But eventually, your sight returns, and you discover a {b}{color=[txt_colo_01]}landscape that makes no sense{/b}{/color}."
+    #play music "mus/mus_room_01.mp3"
+    hide bgwhite
+    with Dissolve(2)
+    "You've arrived in a vast {b}{color=[txt_colo_01]}field of flowers{/b}{/color}, stretching as far as the eye can see."
+    "The flowers, caressed by a gentle breeze, spread their sweet fragrance.\n\n
+     The petals are {b}{color=[txt_colo_01]}luminescent{/b}{/color}, and {b}{color=[txt_colo_01]}hypnotic{/b}{/color}."
+    "When you look up, you see a constellation of stars in a {b}{color=[txt_colo_01]}deep, black sky{/b}{/color}. \n\n
+    But it doesn't really look like a night sky. \n\n It's more like you're lost in {b}{color=[txt_colo_01]}deep space{/b}{/color}."
+
+#############################################################################################
+# CONFRONTATION
+#############################################################################################
+label confrontation_01:
+    a"At first, we ate the flowers. \n\n When the dogs ate all the flowers, we ate the dogs. \n\n And when there were no more dogs..."
+    a"We ate the ones who ate the dogs."
+    a"The taste of the sweet petals lingers, and matures through each ingestion.\n\n
+    One day, only one will remain, the Great Glutton, who will have the flower all within him.\n\n
+    All its power."
+    a"And I won't let anyone ruin this virtuous circle by sticking their nose in our business!!!"
+#############################################################################################
+# MEDICAL CLOSET
+#############################################################################################
+label medical_closet_01:
+menu:
+    "MEDICAL CLOSET""An old medical closet.\n\n The bandages have gone moldy, and the medicine jars are almost empty,
+     each containing only a few pills.\n\n The instructions seem to be very strict, advising you to take only one pill at a
+      time.\n\n What do you want to take?"
+    "Coagulant. {b}{color=[hlt_colo_01]}+2 {image=icon_hlt} {/b}{/color}":
+        $ stat_hlt +=2
+        jump medical_closet_01
+    "Anxiolytic. {b}{color=[snt_colo_01]} +2 {image=icon_snt} {/b}{/color}":
+        $ stat_snt +=2
+        jump medical_closet_01
+    "Performance enhancer. {color=[check_colo_01]} Strength +3 {/color}":
+        "Your strength is increased by 3."
+        $ stat_str +=1
+        call stat_increase
+        pause 0.1
+        $ stat_str +=1
+        call stat_increase
+        pause 0.1
+        $ stat_str +=1
+        call stat_increase
+        jump medical_closet_01
+    "Unidentified pill.":
+        call roll_lck
+        if success == True:
+            "{color=[check_colo_01]} Luck check: Success. {/color}\n\n All your stats are increased by 1."
+            $ stat_str +=1
+            call stat_increase
+            pause 0.1
+            $ stat_mnd +=1
+            call stat_increase
+            pause 0.1
+            $ stat_dex +=1
+            call stat_increase
+            pause 0.1
+            $ stat_lck +=1
+            call stat_increase
+            pause 0.1
+            jump medical_closet_01
+        else:
+            "{color=[check_colo_01]} Luck check: Failure. {/color}\n\n
+            You feel really sick!
+            {b}{color=[hlt_colo_01]} -3 {image=icon_hlt} {/b}{/color}"
+            $ stat_hlt -= 3
+            call hlt_loss
+            call death_check
+            jump medical_closet_01
+    "Nothing.":
+        jump medical_note_01
+#############################################################################################
+# DARK CORNER
+#############################################################################################
+label dark_corner_01:
+menu:
+    "DARKNESS""This corner of the room is plunged into {b}{color=[txt_colo_01]}darkness{/b}{/color}.\n\n
+    You can make out some cupboards.\n\n {b}{color=[txt_colo_01]}A source of light{/b}{/color}, even a dim one,
+    would enable you to rummage through them."
+    "Search the cupboards. {b}{color=[fir_colo_01]} -1 {image=icon_fir} {/b}{/color}":
+        call roll_lck
+        if success == True:
+            "The cupboards contain maintenance equipment that nobody has touched in years.
+            You find an intact bandage  {b}{color=[hlt_colo_01]}+1{image=icon_hlt} {/b}{/color},
+            two small keys {b}{color=[key_colo_01]} +2 {image=icon_key} {/b}{/color}
+            and a match{b}{color=[fir_colo_01]} +1 {image=icon_fir} {/b}{/color}."
+            $ stat_hlt += 1
+            $ stat_key += 2
+            $ stat_fir += 1
+            jump dark_corner_01
+        else:
+            "The cupboards are practically empty, containing nothing but a small key
+            {b}{color=[key_colo_01]} +1 {image=icon_key} {/b}{/color}."
+            $ stat_key += 1
+            jump dark_corner_01
+    "Ignore":
+        jump dark_corner_01
+#############################################################################################
+# MEDICAL NOTE
+#############################################################################################
+label medical_note_01:
+menu:
+    "NOTE""A note, written by a nurse."
+    "Ignore":
+        call choice_selected
+        jump room_03_interact
+    "Read":
+        call choice_selected
+        jump medical_note_01_read
+label medical_note_01_read:
+    play audio "sfx/sfx_paper_01.mp3"
+    "MEDICAL NOTE""{i}{color=[txt_colo_01]} Symptoms:\n\n
+    - Hallucinations\n
+    - Trembling\n
+    - Loss of sleep\n
+    - God complex (?)\n
+    - Iris coloration\n
+ {/i}{/color}"
 # DEATH
 ##############################################################
 label gameover:
@@ -685,4 +977,5 @@ label gameover:
     jump end
     # This ends the game.
 label end:
+    "END"
     $ renpy.full_restart()
