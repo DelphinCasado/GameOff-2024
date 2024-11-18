@@ -15,6 +15,10 @@ image bgclassroom = "bg/bg_classroom_01.png"
 image bgteacherlounge = "bg/bg_teacherlounge_01.png"
 image bgcouselor_A = "bg/bg_counselor_A_01.png"
 image bgcouselor_B = "bg/bg_counselor_B_01.png"
+image bgbotanic_A = "bg/bg_botanic_A_01.png"
+image bgbotanic_B = "bg/bg_botanic_B_01.png"
+image bgbotanic_C = "bg/bg_botanic_C_01.png"
+image bgritual_01 = "bg/bg_ritual_01.png"
 
 image bgflower_01 = "bg/bg_flowerfield_A_01.png"
 image bgwhite = "bg/bg_white_01.png"
@@ -51,6 +55,15 @@ image mc frontr:
     repeat
 image mc captured = "chr/chr_mc_captured_01.png"
 image mcreflection = "chr/chr_mc_reflection_01.png"
+
+image flies:
+    "chr/chr_fly_01.png"
+    pause 0.1
+    "chr/chr_fly_02.png"
+    pause 0.1
+    "chr/chr_fly_03.png"
+    pause 0.1
+    repeat
 
 #ui
 image icon_hlt = "ui/icon_01.png"
@@ -94,7 +107,7 @@ default  stat_star = 0
 ############### GAME START #############################
 ########################################################
 label start:
-    #$ config.rollback_enabled = False
+    $ config.rollback_enabled = False
     # scene black
     # pause 2
     #scene bgmovie
@@ -195,7 +208,7 @@ label star_found:
 
 ##TEST
 label room_01_start:
-    call room_events_reset
+    call room_events_reset from _call_room_events_reset
     scene temp1
     play music "mus/mus_room_01.mp3"
     show bgroom_01
@@ -238,8 +251,8 @@ menu:
         jump end
     "Book C -4 {image=icon1}":
         $ stat_hlt -= 20
-        call hlt_loss
-        call death_check
+        call hlt_loss from _call_hlt_loss
+        call death_check from _call_death_check
         jump room_01
     "Book D":
         jump end
@@ -250,7 +263,7 @@ menu:
 label firstroom_01:
     scene black
     with fade
-    call room_events_reset
+    call room_events_reset from _call_room_events_reset_1
     scene bgmovie
     stop music fadeout 2
     #play music "mus/mus_room_01.mp3"
@@ -272,29 +285,29 @@ menu:
      trying to understand its sudden abandonment by the population. \n\n
     You were close to the old school, and then... you don't remember a thing. \n\n Anyway, you'd better escape fast."
     "Break the ties.":
-        call choice_selected
-        call roll_str
+        call choice_selected from _call_choice_selected
+        call roll_str from _call_roll_str
         if success == True:
             "{color=[check_colo_01]} Strength check: Success. {/color}\n\n Focusing all your strength, you break your bonds and set yourself free."
         else:
             "{color=[check_colo_01]} Strength check: Failure. {/color}\n\n You struggle for several minutes to break the rope.
             \n\n You finally free yourself, but your wrists are bloody and sore.
             {b}{color=[hlt_colo_01]}-4 {image=icon_hlt} {/b}{/color}"
-            call hlt_loss
+            call hlt_loss from _call_hlt_loss_1
             $ stat_hlt -= 4
-            call death_check
+            call death_check from _call_death_check_1
         jump wakingup_02
     "Untie the knots":
-        call choice_selected
-        call roll_dex
+        call choice_selected from _call_choice_selected_1
+        call roll_dex from _call_roll_dex
         if success == True:
             "{color=[check_colo_01]} Dexterity check: Success. {/color}\n\n Using all your dexterity, you manage to undo the ropes around your wrists, then your ankles."
         else:
             "{color=[check_colo_01]} Dexterity check: Failure. {/color}\n\n You spend long minutes wrestling with the knots, your stress mounting with the fear of never freeing yourself.\n\n Eventually, you manage to do it, but your mental state has taken a hit.
             {b}{color=[snt_colo_01]}-4 {image=icon_snt} {/b}{/color}"
-            call snt_loss
+            call snt_loss from _call_snt_loss
             $ stat_snt -= 4
-            call death_check
+            call death_check from _call_death_check_2
         jump wakingup_02
 label wakingup_02:
     stop ambiance fadeout 2
@@ -308,7 +321,7 @@ menu:
     \n\n Maybe uncover some of the {b}{color=[txt_colo_01]}secrets {/b}{/color} that led this place to become a ghost town in the first place. \n\n That was your original reason for coming, after all...
     \n\n But is it worth the risk? You can't lose all your {b}{color=[hlt_colo_01]}health{image=icon_hlt} {/b}{/color} or {b}{color=[snt_colo_01]}sanity{image=icon_snt}{/b}{/color}..."
     "Got it.":
-        call choice_selected
+        call choice_selected from _call_choice_selected_2
         play music "mus/mus_exploration_02.mp3"
         jump room_01_interact
 label room_01_interact:
@@ -345,7 +358,7 @@ screen room_01_interact:
         imagebutton:
             xpos 0.16
             ypos 0.39
-            idle "ui/ui_interact_idle.png"
+            idle "ui/ui_interact_invisible.png"
             action Jump("star_found_01")
             activate_sound "sfx/sfx_ui_select_01.mp3"
     imagebutton:
@@ -357,7 +370,8 @@ screen room_01_interact:
         hover_sound "sfx/sfx_ui_hover_01.mp3"
         activate_sound "sfx/sfx_ui_select_01.mp3"
 label star_found_01:
-    call star_found
+    call star_found from _call_star_found
+    "You found an hidden star..."
     jump room_01_interact
 ############################
 label first_window:
@@ -379,8 +393,8 @@ label bloodstain_01:
     with dissolve
     "STAIN ON THE FLOOR" "Is that... {b}{color=[txt_colo_01]}blood{/b}{/color}? {b}{color=[snt_colo_01]} -1 {image=icon_snt} {/b}{/color}"
     $ stat_snt -=1
-    call snt_loss
-    call death_check
+    call snt_loss from _call_snt_loss_1
+    call death_check from _call_death_check_3
     jump room_01_interact
 ################################
 label calendar_01:
@@ -392,12 +406,12 @@ label calendar_01:
 menu:
     "CALENDAR" "An old calendar. \n\n Like the rest of the town, this school has been abandoned for years, left to rot away from the rest of the world."
     "Ignore":
-        call choice_selected
+        call choice_selected from _call_choice_selected_3
         jump room_01_interact
     "Inspect":
         play audio "sfx/sfx_paper_01.mp3"
-        call choice_selected
-        call roll_lck
+        call choice_selected from _call_choice_selected_4
+        call roll_lck from _call_roll_lck
         if success == True:
             pause 0.2
             play audio "sfx/sfx_key_01.mp3"
@@ -415,7 +429,7 @@ menu:
 label classroom_01:
     scene black
     with fade
-    call room_events_reset
+    call room_events_reset from _call_room_events_reset_2
     scene bgmovie
     #play music "mus/mus_room_01.mp3"
     show bgclassroom
@@ -490,13 +504,13 @@ menu:
     "DESK & STOOLS""Standard furniture for a school.
     \n\n It brings back memories of your own studies in the capital."
     "Ignore":
-        call choice_selected
+        call choice_selected from _call_choice_selected_5
         jump room_02_interact
     "Search the desk.":
-        call choice_selected
+        call choice_selected from _call_choice_selected_6
         play audio "sfx/sfx_cardboard_01.mp3"
         play audio "sfx/sfx_paper_01.mp3"
-        call roll_mnd
+        call roll_mnd from _call_roll_mnd
         if success == True:
             $ stat_fir += 1
             "{color=[check_colo_01]} Perception check: Success. {/color}\n\n
@@ -513,7 +527,7 @@ menu:
 label teacherlounge_01:
     scene black
     with fade
-    call room_events_reset
+    call room_events_reset from _call_room_events_reset_3
     scene bgmovie
     stop music fadeout 3
     play ambiance "sfx/amb_tension_01.mp3"
@@ -522,8 +536,8 @@ label teacherlounge_01:
     with Dissolve(2)
     "You arrive in the teachers' lounge. \n\n The moldy smell of the carpet is nauseating. {b}{color=[snt_colo_01]} -2 {image=icon_snt} {/b}{/color}"
     $ stat_snt -= 2
-    call snt_loss
-    call death_check
+    call snt_loss from _call_snt_loss_2
+    call death_check from _call_death_check_4
     jump room_03_interact
 #####
 label room_03_interact:
@@ -585,10 +599,10 @@ menu:
     "OLD NEWSPAPER""A very old newspaper. \n\n It dates back to long {b}{color=[txt_colo_01]}before the city's desertion{/b}{/color},
     and was probably kept by a teacher as a {b}{color=[txt_colo_01]}souvenir{/b}{/color}."
     "Ignore":
-        call choice_selected
+        call choice_selected from _call_choice_selected_7
         jump room_03_interact
     "Read":
-        call choice_selected
+        call choice_selected from _call_choice_selected_8
         jump newspaper_comet
 label newspaper_comet:
     play audio "sfx/sfx_paper_01.mp3"
@@ -601,7 +615,7 @@ label newspaper_comet:
     jump room_03_interact
 #################################
 label lostkey_01:
-    play audio "sfx/sfx_pot_01.mp3"
+    play audio "sfx/sfx_wood_creak_01.mp3"
     $ event3 = False
     show mc backr:
         xpos 0.38
@@ -611,14 +625,14 @@ label lostkey_01:
 menu:
     "LOST KEY""A {b}{color=[txt_colo_01]} key{/b}{/color} has fallen between the furnitures, but the gap is filled with pieces of {b}{color=[txt_colo_01]} broken glass{/b}{/color} and {b}{color=[txt_colo_01]} splinters of wood{/b}{/color}."
     "Ignore.":
-        call choice_selected
+        call choice_selected from _call_choice_selected_9
         jump room_03_interact
     "Take the key. {b}{color=[hlt_colo_01]}-3 {image=icon_hlt} {/b}{/color}{b}{color=[key_colo_01]} +1 {image=icon_key} {/b}{/color}":
-        call choice_selected
+        call choice_selected from _call_choice_selected_10
         $ stat_key +=1
         $ stat_hlt -=3
-        call hlt_loss
-        call death_check
+        call hlt_loss from _call_hlt_loss_2
+        call death_check from _call_death_check_5
         pause 0.2
         play audio "sfx/sfx_key_01.mp3"
         jump room_03_interact
@@ -638,34 +652,34 @@ menu:
     "To be strong.":
         "Your strength is increased by 2."
         $ stat_str +=1
-        call stat_increase
+        call stat_increase from _call_stat_increase
         pause 0.2
         $ stat_str +=1
-        call stat_increase
+        call stat_increase from _call_stat_increase_1
         jump room_03_interact
     "To stay alert.":
         "Your perception is increased by 2."
         $ stat_mnd +=1
-        call stat_increase
+        call stat_increase from _call_stat_increase_2
         pause 0.2
         $ stat_mnd +=1
-        call stat_increase
+        call stat_increase from _call_stat_increase_3
         jump room_03_interact
     "To demonstrate dexterity.":
         "Your dexterity is increased by 2."
         $ stat_dex +=1
-        call stat_increase
+        call stat_increase from _call_stat_increase_4
         pause 0.2
         $ stat_dex +=1
-        call stat_increase
+        call stat_increase from _call_stat_increase_5
         jump room_03_interact
     "That your lucky star will watch over you.":
         "Your luck is increased by 2."
         $ stat_lck +=1
-        call stat_increase
+        call stat_increase from _call_stat_increase_6
         pause 0.2
         $ stat_lck +=1
-        call stat_increase
+        call stat_increase from _call_stat_increase_7
         jump room_03_interact
 #########################################################
 label photo_01:
@@ -678,16 +692,16 @@ label photo_01:
 menu:
     "FRAMED PHOTOGRAPHS""Photos of school staff hang on the wall. \n\n One of the frames has fallen to the floor."
     "Ignore":
-        call choice_selected
+        call choice_selected from _call_choice_selected_11
         jump room_03_interact
     "Inspect":
-        call choice_selected
+        call choice_selected from _call_choice_selected_12
         "A CLASS PHOTO""The students pose in front of the school. \n You're struck by the appearance of many of them.
          \n\n Their eyes are {b}{color=[txt_colo_01]}bulging and piercingly blue{/b}{/color}. They look both exhausted and {b}{color=[txt_colo_01]}unnaturally agitated.{/b}{/color}
          \n\n This is very unsettling. {b}{color=[snt_colo_01]} -1 {image=icon_snt} {/b}{/color} "
         $ stat_snt -= 1
-        call snt_loss
-        call death_check
+        call snt_loss from _call_snt_loss_3
+        call death_check from _call_death_check_6
         jump room_03_interact
 
 #############################################################################################
@@ -696,7 +710,7 @@ menu:
 label counselor_office_01:
     scene black
     with fade
-    call room_events_reset
+    call room_events_reset from _call_room_events_reset_4
     scene bgmovie
     stop ambiance fadeout 2
     play music "mus/mus_exploration_02.mp3"
@@ -753,7 +767,7 @@ screen room_04_interact:
         ypos 0.74
         idle "ui/ui_exit_idle.png"
         hover "ui/ui_exit_hover.png"
-        action Jump("flower_field_01")
+        action Jump("botanic_01")
         hover_sound "sfx/sfx_ui_hover_01.mp3"
         activate_sound "sfx/sfx_ui_select_01.mp3"
 #################################
@@ -768,7 +782,7 @@ menu:
     "CIGARETTE CASE""In the desk drawer, you find a small, finely decorated metal box containing a few cigarettes and a match."
     "Smoke a cigarette.":
         play audio "sfx/sfx_match_use_01.mp3"
-        call roll_lck
+        call roll_lck from _call_roll_lck_1
         if success == True:
             "{color=[check_colo_01]} Luck check: Success. {/color}\n\n
             It relaxes you… {b}{color=[snt_colo_01]} +3 {image=icon_snt} {/b}{/color}"
@@ -779,8 +793,8 @@ menu:
             How disgusting! \n\n The tobacco must have molded, and made you nauseous.
             {b}{color=[hlt_colo_01]} -2 {image=icon_hlt} {/b}{/color}"
             $ stat_hlt -= 4
-            call hlt_loss
-            call death_check
+            call hlt_loss from _call_hlt_loss_3
+            call death_check from _call_death_check_7
             jump room_04_interact
 
     "Take the match.":
@@ -799,10 +813,10 @@ label note_01:
 menu:
     "A NOTE""A note, adressed to the school's principal."
     "Ignore":
-        call choice_selected
+        call choice_selected from _call_choice_selected_13
         jump room_04_interact
     "Read":
-        call choice_selected
+        call choice_selected from _call_choice_selected_14
         jump note_read_01
 label note_read_01:
     play audio "sfx/sfx_paper_01.mp3"
@@ -820,8 +834,8 @@ label bloodstain_02:
     with dissolve
     "STAIN ON THE FLOOR" "Is that... {b}{color=[txt_colo_01]}blood{/b}{/color}? {b}{color=[snt_colo_01]} -1 {image=icon_snt} {/b}{/color}"
     $ stat_snt -=1
-    call snt_loss
-    call death_check
+    call snt_loss from _call_snt_loss_4
+    call death_check from _call_death_check_8
     jump room_04_interact
 #########################################################
 label locked_01:
@@ -833,10 +847,12 @@ label locked_01:
 menu:
     "LOCKED""It's locked."
     "Ignore":
-        call choice_selected
+        call choice_selected from _call_choice_selected_15
         jump room_04_interact
-    "Use a key" if stat_key >=0:
+    "Use a key" if stat_key >0:
+        play audio "sfx/sfx_unlock.mp3"
         $ stat_key -= 1
+        "**To be implemented.**"
         jump room_04_interact
 
 #############################################################################################
@@ -847,7 +863,7 @@ label flower_field_01:
     show mc backr at entrance_slot_01
     show bgwhite
     with Dissolve(2)
-    call room_events_reset
+    call room_events_reset from _call_room_events_reset_5
     "You remain blind for a long time, blinded by the surrounding light. \n\n
     But eventually, your sight returns, and you discover a {b}{color=[txt_colo_01]}landscape that makes no sense{/b}{/color}."
     #play music "mus/mus_room_01.mp3"
@@ -886,29 +902,29 @@ menu:
     "Performance enhancer. {color=[check_colo_01]} Strength +3 {/color}":
         "Your strength is increased by 3."
         $ stat_str +=1
-        call stat_increase
+        call stat_increase from _call_stat_increase_8
         pause 0.1
         $ stat_str +=1
-        call stat_increase
+        call stat_increase from _call_stat_increase_9
         pause 0.1
         $ stat_str +=1
-        call stat_increase
+        call stat_increase from _call_stat_increase_10
         jump medical_closet_01
     "Unidentified pill.":
-        call roll_lck
+        call roll_lck from _call_roll_lck_2
         if success == True:
             "{color=[check_colo_01]} Luck check: Success. {/color}\n\n All your stats are increased by 1."
             $ stat_str +=1
-            call stat_increase
+            call stat_increase from _call_stat_increase_11
             pause 0.1
             $ stat_mnd +=1
-            call stat_increase
+            call stat_increase from _call_stat_increase_12
             pause 0.1
             $ stat_dex +=1
-            call stat_increase
+            call stat_increase from _call_stat_increase_13
             pause 0.1
             $ stat_lck +=1
-            call stat_increase
+            call stat_increase from _call_stat_increase_14
             pause 0.1
             jump medical_closet_01
         else:
@@ -916,8 +932,8 @@ menu:
             You feel really sick!
             {b}{color=[hlt_colo_01]} -3 {image=icon_hlt} {/b}{/color}"
             $ stat_hlt -= 3
-            call hlt_loss
-            call death_check
+            call hlt_loss from _call_hlt_loss_4
+            call death_check from _call_death_check_9
             jump medical_closet_01
     "Nothing.":
         jump medical_note_01
@@ -930,7 +946,7 @@ menu:
     You can make out some cupboards.\n\n {b}{color=[txt_colo_01]}A source of light{/b}{/color}, even a dim one,
     would enable you to rummage through them."
     "Search the cupboards. {b}{color=[fir_colo_01]} -1 {image=icon_fir} {/b}{/color}":
-        call roll_lck
+        call roll_lck from _call_roll_lck_3
         if success == True:
             "The cupboards contain maintenance equipment that nobody has touched in years.
             You find an intact bandage  {b}{color=[hlt_colo_01]}+1{image=icon_hlt} {/b}{/color},
@@ -954,10 +970,10 @@ label medical_note_01:
 menu:
     "NOTE""A note, written by a nurse."
     "Ignore":
-        call choice_selected
+        call choice_selected from _call_choice_selected_16
         jump room_03_interact
     "Read":
-        call choice_selected
+        call choice_selected from _call_choice_selected_17
         jump medical_note_01_read
 label medical_note_01_read:
     play audio "sfx/sfx_paper_01.mp3"
@@ -968,6 +984,284 @@ label medical_note_01_read:
     - God complex (?)\n
     - Iris coloration\n
  {/i}{/color}"
+ #############################################################################################
+ # BOTANIC ROOM 1
+ #############################################################################################
+label botanic_01:
+     scene black
+     with fade
+     call room_events_reset from _call_room_events_reset_6
+     scene bgmovie
+     #play music "mus/mus_room_01.mp3"
+     show bgbotanic_A
+     show bgbotanic_B
+     play ambiance "sfx/sfx_buzzing_01.mp3" volume 0.15
+     show flies:
+        xpos 0.32
+        ypos 0.2
+     show mc backr at entrance_slot_01
+     with Dissolve(2)
+     "An old botany room. \n\n All the plants are dead..."
+     jump room_botanic_interact
+label room_botanic_interact:
+     call screen room_botanic_interact
+screen room_botanic_interact:
+     if event1 == True:
+         imagebutton:
+             xpos 0.15
+             ypos 0.35
+             idle "ui/ui_interact_idle.png"
+             hover "ui/ui_interact_hover.png"
+             action Jump("notice_board_01")
+             hover_sound "sfx/sfx_ui_hover_01.mp3"
+             activate_sound "sfx/sfx_ui_select_01.mp3"
+     if event2 == True:
+         imagebutton:
+             xpos 0.5
+             ypos 0.45
+             idle "ui/ui_interact_idle.png"
+             hover "ui/ui_interact_hover.png"
+             action Jump("botanic_pots_01")
+             hover_sound "sfx/sfx_ui_hover_01.mp3"
+             activate_sound "sfx/sfx_ui_select_01.mp3"
+     if event3 == True:
+         imagebutton:
+             xpos 0.3
+             ypos 0.593
+             idle "ui/ui_interact_idle.png"
+             hover "ui/ui_interact_hover.png"
+             action Jump("hidden_trapdoor_01")
+             hover_sound "sfx/sfx_ui_hover_01.mp3"
+             activate_sound "sfx/sfx_ui_select_01.mp3"
+     imagebutton:
+         xpos 0.47
+         ypos 0.74
+         idle "ui/ui_exit_idle.png"
+         hover "ui/ui_exit_hover.png"
+         action Jump("end")
+         hover_sound "sfx/sfx_ui_hover_01.mp3"
+         activate_sound "sfx/sfx_ui_select_01.mp3"
+ #############################
+label notice_board_01:
+     $ event1 = False
+     show mc backl:
+         xpos 0.13
+         ypos 0.4
+     with dissolve
+     "NOTICE BOARD""Old announcements. \n\n Among the oldest ones, there are many posters of {b}{color=[txt_colo_01]}lost dogs{/b}{/color}.
+      \n\n The most recent flyers, covering the old ones, are posters of {b}{color=[txt_colo_01]}missing students{/b}{/color}...
+      \n\n First the dogs disappeared, then the townspeople? What happened?"
+     jump room_botanic_interact
+label botanic_pots_01:
+     $ event2 = False
+     show mc backr:
+         xpos 0.4
+         ypos 0.45
+     with dissolve
+     "POTS.""**To be implemented.**"
+     jump room_botanic_interact
+label hidden_trapdoor_01:
+     $ event3 = False
+     show mc frontl:
+         xpos 0.3
+         ypos 0.37
+     with dissolve
+     "RED TILES.""Strange...\n\n But there's nothing to do for now."
+     jump room_botanic_interact
+
+#############################################################################################
+# BOTANIC ROOM 2
+#############################################################################################
+label botanic_02:
+    scene black
+    with fade
+    call room_events_reset from _call_room_events_reset_7
+    $ event4 = False
+    scene bgmovie
+    #play music "mus/mus_room_01.mp3"
+    show bgbotanic_A
+    play ambiance "sfx/sfx_buzzing_01.mp3" volume 0.15
+    show flies:
+       xpos 0.32
+       ypos 0.2
+    show mc backr at entrance_slot_01
+    with Dissolve(2)
+    "An old botany room. \n\n But... Haven't you been here before?"
+    jump room_botanic_interact2
+label room_botanic_interact2:
+    call screen room_botanic_interact2
+screen room_botanic_interact2:
+    if event1 == True:
+        imagebutton:
+            xpos 0.15
+            ypos 0.35
+            idle "ui/ui_interact_idle.png"
+            hover "ui/ui_interact_hover.png"
+            action Jump("notice_board_01")
+            hover_sound "sfx/sfx_ui_hover_01.mp3"
+            activate_sound "sfx/sfx_ui_select_01.mp3"
+    if event2 == True:
+        imagebutton:
+            xpos 0.5
+            ypos 0.45
+            idle "ui/ui_interact_idle.png"
+            hover "ui/ui_interact_hover.png"
+            action Jump("table_01")
+            hover_sound "sfx/sfx_ui_hover_01.mp3"
+            activate_sound "sfx/sfx_ui_select_01.mp3"
+    if event3 == True:
+        imagebutton:
+            xpos 0.3
+            ypos 0.593
+            idle "ui/ui_interact_invisible.png"
+            hover "ui/ui_interact_invisible.png"
+            action Jump("hidden_trapdoor_02")
+            # hover_sound "sfx/sfx_ui_hover_01.mp3"
+            activate_sound "sfx/sfx_ui_select_01.mp3"
+    if event4 == True:
+        imagebutton:
+            xpos 0.3
+            ypos 0.593
+            idle "ui/ui_interact_idle.png"
+            hover "ui/ui_interact_hover.png"
+            action Jump("hidden_trapdoor_03")
+            hover_sound "sfx/sfx_ui_hover_01.mp3"
+            activate_sound "sfx/sfx_ui_select_01.mp3"
+    imagebutton:
+        xpos 0.47
+        ypos 0.74
+        idle "ui/ui_exit_idle.png"
+        hover "ui/ui_exit_hover.png"
+        action Jump("teacherlounge_01")
+        hover_sound "sfx/sfx_ui_hover_01.mp3"
+        activate_sound "sfx/sfx_ui_select_01.mp3"
+#############################
+label notice_board_02:
+    $ event1 = False
+    show mc backl:
+        xpos 0.13
+        ypos 0.4
+    with dissolve
+    "NOTICE BOARD""Old announcements. \n\n Among the oldest ones, there are many posters of {b}{color=[txt_colo_01]}lost dogs{/b}{/color}.
+     \n\n The most recent flyers, covering the old ones, are posters of {b}{color=[txt_colo_01]}missing students{/b}{/color}...
+     \n\n First the dogs disappeared, then the townspeople? What happened?"
+    jump room_botanic_interact2
+
+label hidden_trapdoor_02:
+    $ event3 = False
+    $ event4 = True
+    show mc frontl:
+        xpos 0.3
+        ypos 0.37
+    with dissolve
+    "HIDDEN PASSAGE""The slab seems to move.
+    \n\n Lifting it reveals a {b}{color=[txt_colo_01]}narrow passage{/b}{/color} to a room beneath your feet."
+    play audio "sfx/sfx_wood_creak_01.mp3"
+    show bgbotanic_C
+    jump room_botanic_interact2
+label hidden_trapdoor_03:
+    show mc frontl:
+        xpos 0.3
+        ypos 0.37
+    with dissolve
+menu:
+    "HIDDEN PASSAGE""A narrow passage to a room beneath your feet.\n\n It's too dark to see what's awaiting you."
+    "Go down":
+        play audio "sfx/sfx_wood_creak_01.mp3"
+        show bgbotanic_C
+        jump ritual_01
+    "Ignore":
+        jump room_botanic_interact3
+
+#############################################################################################
+# RITUAL ROOM
+#############################################################################################
+label ritual_01:
+    scene black
+    with fade
+    call room_events_reset from _call_room_events_reset_8
+    scene bgmovie
+    #play music "mus/mus_room_01.mp3"
+    show bgritual_01
+    stop music fadeout 3
+    play ambiance "sfx/amb_tension_02.mp3"
+    show mc backr at entrance_slot_01
+    with Dissolve(2)
+    # "An old botany room. \n\n But... Haven't you been here before?"
+    jump room_ritual_interact
+label room_ritual_interact:
+    call screen room_ritual_interact
+screen room_ritual_interact:
+    if event1 == True:
+        imagebutton:
+            xpos 0.395
+            ypos 0.35
+            idle "ui/ui_interact_idle.png"
+            hover "ui/ui_interact_hover.png"
+            action Jump("altar_01")
+            hover_sound "sfx/sfx_ui_hover_01.mp3"
+            activate_sound "sfx/sfx_ui_select_01.mp3"
+    if event2 == True:
+        imagebutton:
+            xpos 0.5
+            ypos 0.45
+            idle "ui/ui_interact_idle.png"
+            hover "ui/ui_interact_hover.png"
+            action Jump("table_01")
+            hover_sound "sfx/sfx_ui_hover_01.mp3"
+            activate_sound "sfx/sfx_ui_select_01.mp3"
+    if event3 == True:
+        imagebutton:
+            xpos 0.3
+            ypos 0.593
+            idle "ui/ui_interact_invisible.png"
+            hover "ui/ui_interact_invisible.png"
+            action Jump("hidden_trapdoor_02")
+            # hover_sound "sfx/sfx_ui_hover_01.mp3"
+            activate_sound "sfx/sfx_ui_select_01.mp3"
+    if event4 == True:
+        imagebutton:
+            xpos 0.3
+            ypos 0.593
+            idle "ui/ui_interact_idle.png"
+            hover "ui/ui_interact_hover.png"
+            action Jump("hidden_trapdoor_03")
+            hover_sound "sfx/sfx_ui_hover_01.mp3"
+            activate_sound "sfx/sfx_ui_select_01.mp3"
+    imagebutton:
+        xpos 0.47
+        ypos 0.74
+        idle "ui/ui_exit_idle.png"
+        hover "ui/ui_exit_hover.png"
+        action Jump("teacherlounge_01")
+        hover_sound "sfx/sfx_ui_hover_01.mp3"
+        activate_sound "sfx/sfx_ui_select_01.mp3"
+#############################
+label altar_01:
+    $ event1 = False
+    show mc backr:
+        xpos 0.29
+        ypos 0.38
+    with dissolve
+    if  stat_snt > 2:
+        jump altar_01_sane
+    else:
+        jump altar_01_insane
+
+label altar_01_sane:
+menu:
+    "ALTAR""A grotesque sculpture, made of wood, paper and glue, and painted red. A foul smell emanates from it, but you also feel a powerful, inexplicable energy."
+    "You're too sane to interact with the altar." :
+        jump room_ritual_interact
+label altar_01_insane:
+menu:
+    "ALTAR""A grotesque sculpture, made of wood, paper and glue, and painted red. A foul smell emanates from it, but you also feel a powerful, inexplicable energy."
+    "Interact with the altar.":
+        "boo"
+        jump room_ritual_interact
+    "Ignore":
+        jump room_ritual_interact
+
 # DEATH
 ##############################################################
 label gameover:
@@ -977,5 +1271,8 @@ label gameover:
     jump end
     # This ends the game.
 label end:
-    "END"
+    "TEMPORARY END""Thanks for testing :)"
+    "Click to restart"
+    scene black
+    with fade
     $ renpy.full_restart()
