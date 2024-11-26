@@ -371,7 +371,7 @@ screen navigation():
 
         if renpy.get_screen("main_menu"):
             xalign 0.5
-            yalign 0.95
+            yalign 0.9
         else:
             xoffset 60
             yalign 0.5
@@ -480,14 +480,18 @@ style main_menu_vbox:
     yalign 1.0
     yoffset -30
 
+
 style main_menu_text:
     properties gui.text_properties("main_menu", accent=True)
 
+
 style main_menu_title:
     properties gui.text_properties("title")
+    color "#fff"
 
 style main_menu_version:
     properties gui.text_properties("version")
+    color "#fff"
 
 
 ## Game Menu screen ############################################################

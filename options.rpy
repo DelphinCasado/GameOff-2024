@@ -33,7 +33,7 @@ init python:
 ##
 ## The _() surrounding the string marks it as eligible for translation.
 
-define config.name = _("Game Off 2024")
+# define config.name = _("Game Off 2024")
 
 
 ## Determines if the title given above is shown on the main menu screen. Set
@@ -44,7 +44,7 @@ define gui.show_name = True
 
 ## The version of the game.
 
-define config.version = "1.0"
+define config.version = "0.1"
 
 
 ## Text that is placed on the game's about screen. Place the text between the
@@ -71,11 +71,11 @@ define config.mouse = {"default":[("ui/ui_arrow_01.png",0,0)]}
 ## to the player by default. Setting one of these to False will hide the
 ## appropriate mixer.
 
-# define config.main_menu_music = "audio/mus/mus_mainmenu_01.mp3"
+define config.main_menu_music = "audio/mus/mus_mainmenu_01.mp3"
 
 define config.has_sound = True
 define config.has_music = True
-define config.has_voice = True
+define config.has_voice = False
 
 
 ## To allow the user to play a test sound on the sound or voice channel,
