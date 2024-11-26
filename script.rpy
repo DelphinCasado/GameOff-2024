@@ -25,8 +25,11 @@ image bgstaircase_01 = "bg/bg_staircase_01.png"
 image bginfirmary_01 = "bg/bg_infirmary_01.png"
 image bgexit_01 = "bg/bg_exit_01.png"
 image bgcloset_01 = "bg/bg_closet_01.png"
+image bgcloset_01a = "bg/bg_closet_01_a.png"
 image bghole_A = "bg/bg_hole_A_01.png"
 image bghole_B = "bg/bg_hole_B_01.png"
+image bgstardoor_01 = "bg/bg_stardoor_01.png"
+image bgstardoor_02 = "bg/bg_stardoor_02.png"
 
 image bgflower_01 = "bg/bg_flowerfield_A_01.png"
 image bgwhite = "bg/bg_white_01.png"
@@ -112,6 +115,8 @@ default  stat_snt = 10
 default  stat_key = 0
 default  stat_fir = 0
 default stat_knw = 0
+default have_shovel = False
+default have_screwdriver = False
 #####################
 default event1 = True
 default event2 = True
@@ -189,6 +194,22 @@ label hlt_loss:
     return
 label snt_loss:
     play audio "sfx/sfx_sanity_01.mp3"
+    show screen stat_overlay_snt
+    pause 0.01
+    hide screen stat_overlay_snt
+    with Dissolve(0.5)
+    return
+label hlt_gain:
+    play audio "sfx/sfx_health_01.mp3"
+    pause 0.1
+    play audio "sfx/sfx_stat_increase_01.mp3"
+    show screen stat_overlay_hlt
+    pause 0.01
+    hide screen stat_overlay_hlt
+    with Dissolve(0.5)
+    return
+label snt_gain:
+    play audio "sfx/sfx_stat_increase_01.mp3"
     show screen stat_overlay_snt
     pause 0.01
     hide screen stat_overlay_snt
@@ -945,59 +966,7 @@ label flower_field_01:
     But it doesn't really look like a night sky. \n\n It's more like you're lost in {b}{color=[txt_colo_01]}deep space{/b}{/color}."
 
 
-#############################################################################################
-# MEDICAL CLOSET
-#############################################################################################
-label medical_closet_01:
-    call walk_01
-menu:
-    "MEDICAL CLOSET""An old medical closet.\n\n The bandages have gone moldy, and the medicine jars are almost empty,
-     each containing only a few pills.\n\n The instructions seem to be very strict, advising you to take only one pill at a
-      time.\n\n What do you want to take?"
-    "Coagulant. {b}{color=[hlt_colo_01]}+2 {image=icon_hlt} {/b}{/color}":
-        $ stat_hlt +=2
-        jump medical_closet_01
-    "Anxiolytic. {b}{color=[snt_colo_01]} +2 {image=icon_snt} {/b}{/color}":
-        $ stat_snt +=2
-        jump medical_closet_01
-    "Performance enhancer. {color=[check_colo_01]} Strength +3 {/color}":
-        "Your strength is increased by 3."
-        $ stat_str +=1
-        call stat_increase from _call_stat_increase_8
-        pause 0.1
-        $ stat_str +=1
-        call stat_increase from _call_stat_increase_9
-        pause 0.1
-        $ stat_str +=1
-        call stat_increase from _call_stat_increase_10
-        jump medical_closet_01
-    "Unidentified pill. {i}{color=[check_colo_02]}  (Luck){/i}{/color}":
-        call roll_lck from _call_roll_lck_2
-        if success == True:
-            "{color=[check_colo_01]} Luck check: Success. {/color}\n\n All your stats are increased by 1."
-            $ stat_str +=1
-            call stat_increase from _call_stat_increase_11
-            pause 0.1
-            $ stat_mnd +=1
-            call stat_increase from _call_stat_increase_12
-            pause 0.1
-            $ stat_dex +=1
-            call stat_increase from _call_stat_increase_13
-            pause 0.1
-            $ stat_lck +=1
-            call stat_increase from _call_stat_increase_14
-            pause 0.1
-            jump medical_closet_01
-        else:
-            "{color=[check_colo_01]} Luck check: Failure. {/color}\n\n
-            You feel really sick!
-            {b}{color=[hlt_colo_01]} -3 {image=icon_hlt} {/b}{/color}"
-            $ stat_hlt -= 3
-            call hlt_loss from _call_hlt_loss_4
-            call death_check from _call_death_check_9
-            jump medical_closet_01
-    "Nothing.":
-        jump medical_note_01
+
 #############################################################################################
 # DARK CORNER
 #############################################################################################
@@ -1024,28 +993,7 @@ menu:
             jump dark_corner_01
     "Ignore":
         jump dark_corner_01
-#############################################################################################
-# MEDICAL NOTE
-#############################################################################################
-label medical_note_01:
-menu:
-    "NOTE""A note, written by a nurse."
-    "Ignore":
-        call choice_selected from _call_choice_selected_16
-        jump room_03_interact
-    "Read":
-        $ stat_knw +=1
-        call choice_selected from _call_choice_selected_17
-        jump medical_note_01_read
-label medical_note_01_read:
-    play audio "sfx/sfx_paper_01.mp3"
-    "MEDICAL NOTE""{i}{color=[txt_colo_01]} Symptoms:\n\n
-    - Hallucinations\n
-    - Trembling\n
-    - Loss of sleep\n
-    - God complex (?)\n
-    - Iris coloration\n
- {/i}{/color}"
+
  #############################################################################################
  # BOTANIC ROOM 1
  #############################################################################################
@@ -1172,24 +1120,24 @@ label botanic_02:
 label room_botanic_interact2:
     call screen room_botanic_interact2
 screen room_botanic_interact2:
-    if event1 == True:
-        imagebutton:
-            xpos 0.15
-            ypos 0.35
-            idle "ui/ui_interact_idle.png"
-            hover "ui/ui_interact_hover.png"
-            action Jump("notice_board_01")
-            hover_sound "sfx/sfx_ui_hover_01.mp3"
-            activate_sound "sfx/sfx_ui_select_01.mp3"
-    if event2 == True:
-        imagebutton:
-            xpos 0.5
-            ypos 0.45
-            idle "ui/ui_interact_idle.png"
-            hover "ui/ui_interact_hover.png"
-            action Jump("table_01")
-            hover_sound "sfx/sfx_ui_hover_01.mp3"
-            activate_sound "sfx/sfx_ui_select_01.mp3"
+    # if event1 == True:
+    #     imagebutton:
+    #         xpos 0.15
+    #         ypos 0.35
+    #         idle "ui/ui_interact_idle.png"
+    #         hover "ui/ui_interact_hover.png"
+    #         action Jump("notice_board_01")
+    #         hover_sound "sfx/sfx_ui_hover_01.mp3"
+    #         activate_sound "sfx/sfx_ui_select_01.mp3"
+    # if event2 == True:
+    #     imagebutton:
+    #         xpos 0.5
+    #         ypos 0.45
+    #         idle "ui/ui_interact_idle.png"
+    #         hover "ui/ui_interact_hover.png"
+    #         action Jump("table_01")
+    #         hover_sound "sfx/sfx_ui_hover_01.mp3"
+    #         activate_sound "sfx/sfx_ui_select_01.mp3"
     if event3 == True:
         imagebutton:
             xpos 0.3
@@ -1213,7 +1161,7 @@ screen room_botanic_interact2:
         ypos 0.74
         idle "ui/ui_exit_idle.png"
         hover "ui/ui_exit_hover.png"
-        action Jump("teacherlounge_01")
+        action Jump("staircaise_01")
         hover_sound "sfx/sfx_ui_hover_01.mp3"
         activate_sound "sfx/sfx_ui_select_01.mp3"
 #############################
@@ -1250,7 +1198,7 @@ menu:
     "Go down":
         play audio "sfx/sfx_wood_creak_01.mp3"
         show bgbotanic_C
-        jump ritual_01
+        jump stardoor_01
     "Ignore":
         jump room_botanic_interact3
 
@@ -1356,20 +1304,361 @@ label infirmary_01:
     show mc backr at entrance_slot_01
     with Dissolve(2)
     "You arrive in the infirmary."
+    jump room_infirmary_interact
+label room_infirmary_interact:
+     call screen room_infirmary_interact
+screen room_infirmary_interact:
+     if event1 == True:
+         imagebutton:
+             xpos 0.15
+             ypos 0.35
+             idle "ui/ui_interact_idle.png"
+             hover "ui/ui_interact_hover.png"
+             action Jump("medical_closet_01")
+             hover_sound "sfx/sfx_ui_hover_01.mp3"
+             activate_sound "sfx/sfx_ui_select_01.mp3"
+     if event2 == True:
+         imagebutton:
+             xpos 0.5
+             ypos 0.45
+             idle "ui/ui_interact_idle.png"
+             hover "ui/ui_interact_hover.png"
+             action Jump("medical_note_01")
+             hover_sound "sfx/sfx_ui_hover_01.mp3"
+             activate_sound "sfx/sfx_ui_select_01.mp3"
+     if event3 == True:
+         imagebutton:
+             xpos 0.3
+             ypos 0.593
+             idle "ui/ui_interact_idle.png"
+             hover "ui/ui_interact_hover.png"
+             action Jump("hidden_trapdoor_01")
+             hover_sound "sfx/sfx_ui_hover_01.mp3"
+             activate_sound "sfx/sfx_ui_select_01.mp3"
+     imagebutton:
+         xpos 0.47
+         ypos 0.74
+         idle "ui/ui_exit_idle.png"
+         hover "ui/ui_exit_hover.png"
+         action Jump("botanic_02")
+         hover_sound "sfx/sfx_ui_hover_01.mp3"
+         activate_sound "sfx/sfx_steps_02.mp3"
+
+#############################################################################################
+# MEDICAL CLOSET
+#############################################################################################
+label medical_closet_01:
+    $ event1 = False
+    call walk_01
+    pause 0.2
+    play audio "sfx/sfx_wood_creak_01.mp3"
+    show mc backl:
+        xpos 0.18
+        ypos 0.42
+    with dissolve
+menu:
+    "MEDICAL CLOSET""An old medical closet.\n\n The bandages have gone moldy, and the medicine jars are almost empty,
+     each containing only a few pills.\n\n The instructions seem to be very strict, advising you to take only one pill at a
+      time.\n\n What do you want to take?"
+    "Coagulant. {b}{color=[hlt_colo_01]}+2 {image=icon_hlt} {/b}{/color}":
+        $ stat_hlt +=2
+        call hlt_gain
+        jump room_infirmary_interact
+    "Anxiolytic. {b}{color=[snt_colo_01]} +2 {image=icon_snt} {/b}{/color}":
+        $ stat_snt +=2
+        call snt_gain
+        jump room_infirmary_interact
+    "Performance enhancer. {color=[check_colo_01]} Strength +3 {/color}":
+        "Your strength is increased by 3."
+        $ stat_str +=1
+        call stat_increase from _call_stat_increase_8
+        pause 0.1
+        $ stat_str +=1
+        call stat_increase from _call_stat_increase_9
+        pause 0.1
+        $ stat_str +=1
+        call stat_increase from _call_stat_increase_10
+        jump room_infirmary_interact
+    "Unidentified pill. {i}{color=[check_colo_02]}  (Luck){/i}{/color}":
+        call roll_lck from _call_roll_lck_2
+        if success == True:
+            "{color=[check_colo_01]} Luck check: Success. {/color}\n\n All your stats are increased by 1."
+            $ stat_str +=1
+            call stat_increase from _call_stat_increase_11
+            pause 0.1
+            $ stat_mnd +=1
+            call stat_increase from _call_stat_increase_12
+            pause 0.1
+            $ stat_dex +=1
+            call stat_increase from _call_stat_increase_13
+            pause 0.1
+            $ stat_lck +=1
+            call stat_increase from _call_stat_increase_14
+            pause 0.1
+            jump room_infirmary_interact
+        else:
+            "{color=[check_colo_01]} Luck check: Failure. {/color}\n\n
+            You feel really sick!
+            {b}{color=[hlt_colo_01]} -3 {image=icon_hlt} {/b}{/color}"
+            $ stat_hlt -= 3
+            call hlt_loss from _call_hlt_loss_4
+            call death_check from _call_death_check_9
+            jump room_infirmary_interact
+    "Nothing.":
+        jump room_infirmary_interact
+
+# MEDICAL NOTE
+############################
+label medical_note_01:
+    $ event2 = False
+    call walk_01
+    pause 0.2
+    play audio "sfx/sfx_metal_01.mp3"
+    show mc backl:
+        xpos 0.24
+        ypos 0.32
+    with dissolve
+menu:
+    "NOTE""A note, written by a nurse."
+    "Ignore":
+        call choice_selected from _call_choice_selected_16
+        jump room_infirmary_interact
+    "Read":
+        $ stat_knw +=1
+        call choice_selected from _call_choice_selected_17
+        jump medical_note_01_read
+label medical_note_01_read:
+    play audio "sfx/sfx_paper_01.mp3"
+    "MEDICAL NOTE""{i}{color=[txt_colo_01]} Symptoms:\n\n
+    - Hallucinations\n
+    - Trembling\n
+    - Loss of sleep\n
+    - God complex (?)\n
+    - Iris coloration\n\n
+    These symptoms are no longer confined to students, but can be seen throughout the city.
+ {/i}{/color}"
+    jump room_infirmary_interact
+
 #############################################################################################
 # CLOSET
 #############################################################################################
 label closet_01:
-    stop music fadeout 2
+    # stop music fadeout 2
     play ambiance "sfx/amb_steps_01.mp3"
     scene black
     with fade
     call room_events_reset
     scene bgmovie
     show bgcloset_01
+    show bgcloset_01a
     show mc backr at entrance_slot_01
     with Dissolve(2)
     "You arrive in a maintenance closet."
+    jump room_closet_interact
+label room_closet_interact:
+     call screen room_closet_interact
+screen room_closet_interact:
+     if event1 == True:
+         imagebutton:
+             xpos 0.18
+             ypos 0.37
+             idle "ui/ui_interact_idle.png"
+             hover "ui/ui_interact_hover.png"
+             action Jump("firstaid_01")
+             hover_sound "sfx/sfx_ui_hover_01.mp3"
+             activate_sound "sfx/sfx_ui_select_01.mp3"
+     if event2 == True:
+         imagebutton:
+             xpos 0.5
+             ypos 0.32
+             idle "ui/ui_interact_idle.png"
+             hover "ui/ui_interact_hover.png"
+             action Jump("wall_writing_01")
+             hover_sound "sfx/sfx_ui_hover_01.mp3"
+             activate_sound "sfx/sfx_ui_select_01.mp3"
+     if event3 == True:
+         imagebutton:
+             xpos 0.35
+             ypos 0.45
+             idle "ui/ui_interact_idle.png"
+             hover "ui/ui_interact_hover.png"
+             action Jump("toolbox_01")
+             hover_sound "sfx/sfx_ui_hover_01.mp3"
+             activate_sound "sfx/sfx_ui_select_01.mp3"
+     imagebutton:
+         xpos 0.47
+         ypos 0.74
+         idle "ui/ui_exit_idle.png"
+         hover "ui/ui_exit_hover.png"
+         action Jump("exit_01")
+         hover_sound "sfx/sfx_ui_hover_01.mp3"
+         activate_sound "sfx/sfx_steps_02.mp3"
+label firstaid_01:
+    $ event1 = False
+    call walk_01
+    show mc backl:
+        xpos 0.2
+        ypos 0.46
+    with dissolve
+menu:
+    "FIRST-AID KIT""An old first aid kit, almost empty. What do you want to take?"
+    "Coagulant. {b}{color=[hlt_colo_01]}+2 {image=icon_hlt} {/b}{/color}":
+        $ stat_hlt +=2
+        call hlt_gain
+        jump room_closet_interact
+    "Anxiolytic. {b}{color=[snt_colo_01]} +2 {image=icon_snt} {/b}{/color}":
+        $ stat_snt +=2
+        call snt_gain
+        jump room_closet_interact
+    "Nothing.":
+        jump room_closet_interact
+label wall_writing_01:
+    $ event2 = False
+    $ stat_knw +=1
+    call walk_01
+    show mc backr:
+        xpos 0.36
+        ypos 0.5
+    with dissolve
+    "WRITING ON A WALL""A writing in a red substance. \n\n {i}{color=[txt_colo_01]}I'll find you all. \n\nI'll be the Great Glutton, no one else. {/i}{/color}
+    \n\n The message seems ancient. You don't think it's addressed to you."
+    jump room_closet_interact
+label toolbox_01:
+    $ event3 = False
+    call walk_01
+    show mc backr:
+        xpos 0.27
+        ypos 0.39
+    with dissolve
+menu:
+    "LOCKED CHEST""A large wooden chest, locked with chains and two padlocks."
+    "Ignore":
+        call choice_selected
+        jump room_closet_interact
+    "Open the chest {b}{color=[key_colo_01]} -2 {image=icon_key} {/b}{/color}" if stat_key >=2:
+        play audio "sfx/sfx_unlock.mp3"
+        pause 0.2
+        play audio "sfx/sfx_wood_open_01.mp3"
+        hide bgcloset_01a
+        with dissolve
+        $ stat_key -= 2
+        jump toolbox_02
+label toolbox_02:
+menu:
+    "TOOLBOX""A large crate full of tools. Some of them would make a good improvised weapon."
+    "Search for a light weapon (Uses Dexterity).":
+        $ have_screwdriver = True
+        "You find a screwdriver. Long and pointy, it could be used as a weapon."
+        jump room_closet_interact
+    "Search for a heavy, weapon (Uses Strenght).":
+        $ have_shovel = True
+        "You find a big shovel. It might come in handy..."
+        jump room_closet_interact
+    "Ignore":
+        call choice_selected
+        jump room_closet_interact
+#############################################################################################
+# STAIRCASE
+#############################################################################################
+label staircaise_01:
+    stop ambiance fadeout 1
+    play ambiance "sfx/amb_steps_01.mp3"
+    scene black
+    with fade
+    call room_events_reset
+    scene bgmovie
+    show bgstaircase_01
+    show mc backr at entrance_slot_01
+    with Dissolve(2)
+    "You arrive in a staircase."
+#############################################################################################
+# STAR ROOM
+#############################################################################################
+label stardoor_01:
+    stop ambiance fadeout 1
+    # play ambiance "sfx/amb_steps_01.mp3"
+    scene black
+    with fade
+    call room_events_reset
+    scene bgmovie
+    show bg_stardoor_01
+    show mc backr at entrance_slot_01
+    with Dissolve(2)
+    "You arrive in a strange empty room."
+    jump room_stardoor_interact
+label room_stardoor_interact:
+    call screen room_stardoor_interact
+screen room_stardoor_interact:
+    if event1 == True:
+        imagebutton:
+            xpos 0.437
+            ypos 0.27
+            idle "ui/ui_interact_idle.png"
+            hover "ui/ui_interact_hover.png"
+            action Jump("stardoor_use")
+            hover_sound "sfx/sfx_ui_hover_01.mp3"
+            activate_sound "sfx/sfx_ui_select_01.mp3"
+    if event2 == True:
+        imagebutton:
+            xpos 0.21
+            ypos 0.22
+            idle "ui/ui_interact_idle.png"
+            hover "ui/ui_interact_hover.png"
+            action Jump("window_02")
+            hover_sound "sfx/sfx_ui_hover_01.mp3"
+            activate_sound "sfx/sfx_ui_select_01.mp3"
+    imagebutton:
+        xpos 0.47
+        ypos 0.74
+        idle "ui/ui_exit_idle.png"
+        hover "ui/ui_exit_hover.png"
+        action Jump("closet_01")
+        hover_sound "sfx/sfx_ui_hover_01.mp3"
+        activate_sound "sfx/sfx_ui_select_01.mp3"
+label stardoor_use:
+    $ event1 = False
+    call walk_01
+    pause 0.2
+    # play audio "sfx/sfx_metal_01.mp3"
+    show mc backr:
+        xpos 0.35
+        ypos 0.32
+    with dissolve
+    if stat_star == 4:
+        jump stardoor_use_yes
+    else:
+        jump stardoor_use_no
+label stardoor_use_yes:
+menu:
+    "STRANGE PAINTED DOOR""You feel a powerful energy, as you recall the 4 star symbols you observed earlier."
+    "Interact with the door":
+        jump stardoor_open
+    "Ignore":
+        call choice_selected
+        jump room_stardoor_interact
+label stardoor_use_no:
+menu:
+    "STRANGE PAINTED DOOR""You didn't find enough stars to enter."
+    "Ignore":
+        call choice_selected
+        jump room_stardoor_interact
+label stardoor_open:
+    show bg_stardoor_02
+    show mc backr at entrance_slot_01
+    with Dissolve(2)
+    "wow"
+
+label window_02:
+    call walk_01
+    pause 0.2
+    play audio "sfx/sfx_wood_creak_01.mp3"
+    $ event2 = False
+    show mc backl:
+        xpos 0.18
+        ypos 0.32
+    with dissolve
+    "WINDOW" "You look outside. You're now on the {b}{color=[txt_colo_01]}ground floor{/b}{/color}.  \n\n Alas, the boards barricading the window {b}{color=[txt_colo_01]}won't budge{/b}{/color}."
+    jump room_stardoor_interact
 #############################################################################################
 # EXIT
 #############################################################################################
@@ -1383,10 +1672,7 @@ label exit_01:
     show bgexit_01
     show mc backr at entrance_slot_01
     with Dissolve(2)
-    "You arrive in the entrance hall.
-    \n\n You see the large doors leading to the {b}{color=[txt_colo_01]}outside{/b}{/color}, and through the filthy glass, the sun's rays.
-    \n\n  Freedom.
-    \n\n {b}{color=[txt_colo_01]}The exit{/b}{/color}."
+    "You arrive in the entrance hall.\n\n You see the large doors leading to the {b}{color=[txt_colo_01]}outside{/b}{/color}, and through the filthy glass, the sun's rays.\n\n  Freedom.\n\n {b}{color=[txt_colo_01]}The exit{/b}{/color}."
 label confrontation_01:
     stop music fadeout 2
     play audio "sfx/sfx_steps_03.mp3"
@@ -1397,19 +1683,15 @@ label confrontation_01:
         ypos 0.43
     with Dissolve(2)
 menu:
-    a"Hello friend.
-     \n\n I see you found your way out. \n\n Good. I was very worried."
+    a"Hello friend.\n\n I see you found your way out. \n\n Good. I was very worried."
     "Stop. I know it was you who brought me here.":
-        a"That's true.
-         \n\n But it was a {b}{color=[txt_colo_01]}misunderstanding{/b}{/color} on my part."
+        a"That's true.\n\n But it was a {b}{color=[txt_colo_01]}misunderstanding{/b}{/color} on my part."
         jump confrontation_02
     "Let me pass, I'm leaving now.":
         a"Let me first explain myself, please."
         jump confrontation_02
 label confrontation_02:
-    a"I mistook you for a {b}{color=[txt_colo_01]}resident{/b}{/color} of this town.
-    \n\nI didn't realize my mistake until it was too late.
-    \n\nI tied you up in the abandonned school, then you freed yourself, and here I was with a {b}{color=[txt_colo_01]}wandering problem... You."
+    a"I mistook you for a {b}{color=[txt_colo_01]}resident{/b}{/color} of this town.\n\nI didn't realize my mistake until it was too late.\n\nI tied you up in the abandonned school, then you freed yourself, and here I was with a {b}{color=[txt_colo_01]}wandering problem... You."
     stop music fadeout 2
     play ambiance "sfx/amb_tension_02.mp3" fadein 0.5
     a"So I had to improvise.
@@ -1448,9 +1730,7 @@ menu:
     #"Attack him with your fists. {i}{color=[check_colo_02]}  (Strenght){/i}{/color}":
     #     jump confrontation_03
 label confrontation_03:
-    a"At first, we {b}{color=[txt_colo_01]}ate the flowers{/b}{/color}, and we became intoxicated by its glorious {b}{color=[txt_colo_01]}power{/b}{/color}.
-    \n\nWhen the wild dogs came and ate all the flowers, we {b}{color=[txt_colo_01]}ate the dogs{/b}{/color}, just so we could taste the flower within them.
-    \n\n And when there were {b}{color=[txt_colo_01]}no more dogs left{/b}{/color}..."
+    a"At first, we {b}{color=[txt_colo_01]}ate the flowers{/b}{/color}, and we became intoxicated by its glorious {b}{color=[txt_colo_01]}power{/b}{/color}.\n\n When the wild dogs came and ate all the flowers, we {b}{color=[txt_colo_01]}ate the dogs{/b}{/color}, just so we could taste the flower within them. \n\nAnd when there were {b}{color=[txt_colo_01]}no more dogs left{/b}{/color}..."
     play audio "sfx/sfx_impact_01.mp3"
 menu:
     a"{b}{color=[txt_colo_01]}We ate the ones who had eaten the dogs{/b}{/color}."
@@ -1470,6 +1750,10 @@ menu:
     a"AND I WON'T LET ANYONE RUIN THIS VIRTUOUS CIRCLE BY STICKING THEIR NOSE IN OUR BUSINESS!!!"
     "Attack him with your fists. {i}{color=[check_colo_02]}  (Strenght){/i}{/color}":
         "d"
+    "Attack him with your shovel. {i}{color=[check_colo_02]}  (Strenght){/i}{/color}" if have_shovel == True:
+        "d"
+    "Attack him with your screwdriver. {i}{color=[check_colo_02]}  (Dexterity){/i}{/color}" if have_screwdriver == True:
+        "d"
 
 #############################################################################################
 # OUTDOOR
@@ -1477,7 +1761,9 @@ menu:
 label outdoor_01:
     scene black
     with fade
-    # play music "mus/mus_mainmenu_01.mp3"
+    play audio "sfx/sfx_steps_01.mp3"
+    pause 0.1
+    play music "mus/mus_mainmenu_01.mp3" fadeout 0.5
     call room_events_reset
     scene bgoutdoor_01
     show mc frontr:
@@ -1485,7 +1771,7 @@ label outdoor_01:
         ypos 0.5
     with Dissolve(2)
     pause 1
-    "You feel the air on your face as you gaze out over the schoolyard. Congratulations, you've survived this terrible journey."
+    "You feel the air on your face as you gaze out over the schoolyard. \n\n Congratulations, you've survived this terrible journey."
     "YOU GOT ENDING 1/X
     \n\n \"Safe and Sound.\""
     jump credits_01
