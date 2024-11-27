@@ -67,6 +67,7 @@ image mc frontr:
 image mc captured = "chr/chr_mc_captured_01.png"
 image mcreflection = "chr/chr_mc_reflection_01.png"
 
+
 image flies:
     "chr/chr_fly_01.png"
     pause 0.1
@@ -83,7 +84,8 @@ image npc1 frontl:
     "chr/chr_npc1_A_02.png"
     pause 0.73
     repeat
-
+image npc1 dead = "chr/chr_npc1_dead_01.png"
+image npc1 hurt = "chr/chr_npc1_hurt_01.png"
 #ui
 image icon_hlt = "ui/icon_01.png"
 image icon_snt = "ui/icon_02.png"
@@ -123,14 +125,14 @@ default event2 = True
 default event3 = True
 default event4 = True
 default eventstar = True
-
 default  stat_star = 0
 
+default ending = 0
 ########################################################
 ############### GAME START #############################
 ########################################################
 label start:
-    # $ config.rollback_enabled = False
+    $ config.rollback_enabled = False
     # scene black
     # pause 2
     #scene bgmovie
@@ -200,6 +202,8 @@ label snt_loss:
     with Dissolve(0.5)
     return
 label hlt_gain:
+    if stat_hlt > 10:
+            $stat_hlt = 10
     play audio "sfx/sfx_health_01.mp3"
     pause 0.1
     play audio "sfx/sfx_stat_increase_01.mp3"
@@ -209,6 +213,8 @@ label hlt_gain:
     with Dissolve(0.5)
     return
 label snt_gain:
+    if stat_snt > 10:
+            $stat_snt = 10
     play audio "sfx/sfx_stat_increase_01.mp3"
     show screen stat_overlay_snt
     pause 0.01
@@ -231,6 +237,20 @@ label choice_selected:
 
 label stat_increase:
     play audio "sfx/sfx_stat_increase_01.mp3"
+    show screen stat_overlay_01
+    pause 0.01
+    hide screen stat_overlay_01
+    with Dissolve(0.5)
+    return
+label key_gain:
+    play audio "sfx/sfx_key_01.mp3"
+    show screen stat_overlay_01
+    pause 0.01
+    hide screen stat_overlay_01
+    with Dissolve(0.5)
+    return
+label fir_gain:
+    play audio "sfx/sfx_match_pick_01.mp3"
     show screen stat_overlay_01
     pause 0.01
     hide screen stat_overlay_01
@@ -406,11 +426,10 @@ menu:
         call choice_selected from _call_choice_selected_4
         call roll_mnd from _call_roll_lck
         if success == True:
-            pause 0.2
-            play audio "sfx/sfx_key_01.mp3"
-            $ stat_key += 1
             "{color=[check_colo_01]} Perception check: Success. {/color}\n\n
             A small key has been taped between two pages. It might come in handy… {b}{color=[key_colo_01]} +1 {image=icon_key} {/b}{/color}"
+            $ stat_key += 1
+            call key_gain
             jump room_01_interact
         else:
             "{color=[check_colo_01]} Perception check: Failure. {/color}\n\n
@@ -510,9 +529,10 @@ menu:
         play audio "sfx/sfx_paper_01.mp3"
         call roll_lck
         if success == True:
-            $ stat_fir += 1
             "{color=[check_colo_01]} Luck check: Success. {/color}\n\n
             You find a match. {b}{color=[fir_colo_01]} +1 {image=icon_fir} {/b}{/color}"
+            $ stat_fir += 1
+            call fir_gain
             jump room_02_interact
         else:
             "{color=[check_colo_01]} Luck check: Failure. {/color}\n\n
@@ -526,6 +546,7 @@ label teacherlounge_01:
     scene black
     with fade
     call room_events_reset from _call_room_events_reset_3
+    play audio "sfx/amb_steps_01.mp3"
     scene bgmovie
     stop music fadeout 3
     play ambiance "sfx/amb_tension_01.mp3"
@@ -728,7 +749,7 @@ label counselor_office_01:
         xpos 0.242
         ypos 0.6
     with Dissolve(2)
-    "You arrive in a counselor's office... \n\n But there is {b}{color=[txt_colo_01]}someone here.{/b}{/color}"
+    "You arrive in a counselor's office... \n\n But there is {b}{color=[txt_colo_01]}someone here.{/b}{/color} \n\nA stranger, wearing a dress decorated with fabric flowers, and a dog mask"
     jump npc1_01
 label npc1_01:
 menu:
@@ -747,8 +768,8 @@ menu:
             \n\nThe answer is simple: sometimes, {b}{color=[txt_colo_01]}people move{/b}{/color}. And sometimes, they all move at the same time...
             \n\n {b}{color=[txt_colo_01]}Mistery solved!{/b}{/color}"
             jump npc1_02
-    "Attack him with your fists. {i}{color=[check_colo_02]}  (Strenght){/i}{/color}":
-        jump npc1_04
+    # "Attack him with your fists. {i}{color=[check_colo_02]}  (Strenght){/i}{/color}":
+    #     jump npc1_04
 label npc1_02:
 menu:
     a"You should leave quickly. The building is old and can be dangerous.
@@ -765,8 +786,8 @@ menu:
     "Were you a student here?":
         a"...A long time ago."
         jump npc1_03
-    "Attack him with your fists. {i}{color=[check_colo_02]}  (Strenght){/i}{/color}":
-        jump npc1_04
+    # "Attack him with your fists. {i}{color=[check_colo_02]}  (Strenght){/i}{/color}":
+    #     jump npc1_04
 label npc1_03:
     a"Have a nice day."
     stop music fadeout 3
@@ -837,15 +858,15 @@ screen room_04_interact:
             action Jump("bloodstain_02")
             hover_sound "sfx/sfx_ui_hover_01.mp3"
             activate_sound "sfx/sfx_ui_select_01.mp3"
-    if event4 == True:
-        imagebutton:
-            xpos 0.225
-            ypos 0.67
-            idle "ui/ui_interact_idle.png"
-            hover "ui/ui_interact_hover.png"
-            action Jump("locked_01")
-            hover_sound "sfx/sfx_ui_hover_01.mp3"
-            activate_sound "sfx/sfx_ui_select_01.mp3"
+    # if event4 == True:
+    #     imagebutton:
+    #         xpos 0.225
+    #         ypos 0.67
+    #         idle "ui/ui_interact_idle.png"
+    #         hover "ui/ui_interact_hover.png"
+    #         action Jump("locked_01")
+    #         hover_sound "sfx/sfx_ui_hover_01.mp3"
+    #         activate_sound "sfx/sfx_ui_select_01.mp3"
     imagebutton:
         xpos 0.47
         ypos 0.74
@@ -885,6 +906,7 @@ menu:
     "Take the match.":
         play audio "sfx/sfx_match_pick_01.mp3"
         $ stat_fir += 1
+        call fir_gain
         jump room_04_interact
 
 #################################
@@ -927,23 +949,23 @@ label bloodstain_02:
     call death_check from _call_death_check_8
     jump room_04_interact
 #########################################################
-label locked_01:
-    call walk_01
-    $ event4 = False
-    show mc backl zorder 15:
-        xpos 0.2
-        ypos 0.55
-    with dissolve
-menu:
-    "LOCKED""It's locked."
-    "Ignore":
-        call choice_selected from _call_choice_selected_15
-        jump room_04_interact
-    "Use a key" if stat_key >0:
-        play audio "sfx/sfx_unlock.mp3"
-        $ stat_key -= 1
-        "**To be implemented.**"
-        jump room_04_interact
+# label locked_01:
+#     call walk_01
+#     $ event4 = False
+#     show mc backl zorder 15:
+#         xpos 0.2
+#         ypos 0.55
+#     with dissolve
+# menu:
+#     "LOCKED""It's locked."
+#     "Ignore":
+#         call choice_selected from _call_choice_selected_15
+#         jump room_04_interact
+#     "Use a key" if stat_key >0:
+#         play audio "sfx/sfx_unlock.mp3"
+#         $ stat_key -= 1
+#         "**To be implemented.**"
+#         jump room_04_interact
 
 #############################################################################################
 # FLOWER FIELD
@@ -967,32 +989,6 @@ label flower_field_01:
 
 
 
-#############################################################################################
-# DARK CORNER
-#############################################################################################
-label dark_corner_01:
-menu:
-    "DARKNESS""This corner of the room is plunged into {b}{color=[txt_colo_01]}darkness{/b}{/color}.\n\n
-    You can make out some cupboards.\n\n {b}{color=[txt_colo_01]}A source of light{/b}{/color}, even a dim one,
-    would enable you to rummage through them."
-    "Search the cupboards. {b}{color=[fir_colo_01]} -1 {image=icon_fir} {/b}{/color}":
-        call roll_lck from _call_roll_lck_3
-        if success == True:
-            "The cupboards contain maintenance equipment that nobody has touched in years.
-            You find an intact bandage  {b}{color=[hlt_colo_01]}+1{image=icon_hlt} {/b}{/color},
-            two small keys {b}{color=[key_colo_01]} +2 {image=icon_key} {/b}{/color}
-            and a match{b}{color=[fir_colo_01]} +1 {image=icon_fir} {/b}{/color}."
-            $ stat_hlt += 1
-            $ stat_key += 2
-            $ stat_fir += 1
-            jump dark_corner_01
-        else:
-            "The cupboards are practically empty, containing nothing but a small key
-            {b}{color=[key_colo_01]} +1 {image=icon_key} {/b}{/color}."
-            $ stat_key += 1
-            jump dark_corner_01
-    "Ignore":
-        jump dark_corner_01
 
  #############################################################################################
  # BOTANIC ROOM 1
@@ -1115,7 +1111,7 @@ label botanic_02:
        ypos 0.2
     show mc backr at entrance_slot_01
     with Dissolve(2)
-    "An old botany room. \n\n But... Haven't you been here before?"
+    "An old botany room. \n\n But... Haven't you been here before? \n\n This piece looks identical. Or maybe not."
     jump room_botanic_interact2
 label room_botanic_interact2:
     call screen room_botanic_interact2
@@ -1185,7 +1181,8 @@ label hidden_trapdoor_02:
     with dissolve
     "HIDDEN PASSAGE""The slab seems to move.
     \n\n Lifting it reveals a {b}{color=[txt_colo_01]}narrow passage{/b}{/color} to a room beneath your feet."
-    play audio "sfx/sfx_wood_creak_01.mp3"
+    play audio "sfx/sfx_wood_creak_01.mp3" volume 0.2
+    play audio "sfx/sfx_pot_01.mp3"
     show bgbotanic_C
     jump room_botanic_interact2
 label hidden_trapdoor_03:
@@ -1210,6 +1207,7 @@ label ritual_01:
     with fade
     call room_events_reset from _call_room_events_reset_8
     scene bgmovie
+    play audio "sfx/amb_steps_01.mp3"
     #play music "mus/mus_room_01.mp3"
     show bgritual_01
     stop music fadeout 3
@@ -1310,8 +1308,8 @@ label room_infirmary_interact:
 screen room_infirmary_interact:
      if event1 == True:
          imagebutton:
-             xpos 0.15
-             ypos 0.35
+             xpos 0.21
+             ypos 0.38
              idle "ui/ui_interact_idle.png"
              hover "ui/ui_interact_hover.png"
              action Jump("medical_closet_01")
@@ -1319,8 +1317,8 @@ screen room_infirmary_interact:
              activate_sound "sfx/sfx_ui_select_01.mp3"
      if event2 == True:
          imagebutton:
-             xpos 0.5
-             ypos 0.45
+             xpos 0.27
+             ypos 0.3
              idle "ui/ui_interact_idle.png"
              hover "ui/ui_interact_hover.png"
              action Jump("medical_note_01")
@@ -1328,11 +1326,20 @@ screen room_infirmary_interact:
              activate_sound "sfx/sfx_ui_select_01.mp3"
      if event3 == True:
          imagebutton:
-             xpos 0.3
-             ypos 0.593
+             xpos 0.33
+             ypos 0.755
              idle "ui/ui_interact_idle.png"
              hover "ui/ui_interact_hover.png"
-             action Jump("hidden_trapdoor_01")
+             action Jump("bloodstain_03")
+             hover_sound "sfx/sfx_ui_hover_01.mp3"
+             activate_sound "sfx/sfx_ui_select_01.mp3"
+     if event4 == True:
+         imagebutton:
+             xpos 0.5
+             ypos 0.35
+             idle "ui/ui_interact_idle.png"
+             hover "ui/ui_interact_hover.png"
+             action Jump("dark_corner_01")
              hover_sound "sfx/sfx_ui_hover_01.mp3"
              activate_sound "sfx/sfx_ui_select_01.mp3"
      imagebutton:
@@ -1343,6 +1350,47 @@ screen room_infirmary_interact:
          action Jump("botanic_02")
          hover_sound "sfx/sfx_ui_hover_01.mp3"
          activate_sound "sfx/sfx_steps_02.mp3"
+#############################################################################################
+# DARK CORNER
+#############################################################################################
+label dark_corner_01:
+    $ event4 = False
+    call walk_01
+    pause 0.2
+    # play audio "sfx/sfx_wood_creak_01.mp3"
+    show mc backr:
+        xpos 0.37
+        ypos 0.5
+    with dissolve
+menu:
+    "DARKNESS""This corner of the room is plunged into {b}{color=[txt_colo_01]}darkness{/b}{/color}.\n\n
+    You can make out some cupboards.\n\n {b}{color=[txt_colo_01]}A source of light{/b}{/color}, even a dim one,
+    would enable you to rummage through them."
+    "Search the cupboards. {b}{color=[fir_colo_01]} -1 {image=icon_fir} {/b}{/color} {i}{color=[check_colo_02]}(Luck){/i}{/color}":
+        call choice_selected
+        play audio "sfx/sfx_wood_open_01.mp3"
+        call roll_lck from _call_roll_lck_3
+        if success == True:
+            "{color=[check_colo_01]} Luck check: Success. {/color}\n\nThe cupboards contain maintenance equipment that nobody has touched in years.
+            \n\nYou find an intact bandage  {b}{color=[hlt_colo_01]}+1{image=icon_hlt} {/b}{/color}
+            two small keys {b}{color=[key_colo_01]} +2 {image=icon_key} {/b}{/color}
+            and a match{b}{color=[fir_colo_01]} +1 {image=icon_fir} {/b}{/color}."
+            $ stat_hlt += 1
+            call hlt_gain
+            pause 0.1
+            $ stat_key += 2
+            call key_gain
+            pause 0.1
+            $ stat_fir += 1
+            call fir_gain
+            jump room_infirmary_interact
+        else:
+            "{color=[check_colo_01]} Luck check: Failure. {/color}\n\nThe cupboards are practically empty, containing nothing but a small key
+            {b}{color=[key_colo_01]} +1 {image=icon_key} {/b}{/color}."
+            $ stat_key += 1
+            jump room_infirmary_interact
+    "Ignore":
+        jump room_infirmary_interact
 
 #############################################################################################
 # MEDICAL CLOSET
@@ -1361,14 +1409,17 @@ menu:
      each containing only a few pills.\n\n The instructions seem to be very strict, advising you to take only one pill at a
       time.\n\n What do you want to take?"
     "Coagulant. {b}{color=[hlt_colo_01]}+2 {image=icon_hlt} {/b}{/color}":
+        call choice_selected
         $ stat_hlt +=2
         call hlt_gain
         jump room_infirmary_interact
     "Anxiolytic. {b}{color=[snt_colo_01]} +2 {image=icon_snt} {/b}{/color}":
+        call choice_selected
         $ stat_snt +=2
         call snt_gain
         jump room_infirmary_interact
     "Performance enhancer. {color=[check_colo_01]} Strength +3 {/color}":
+        call choice_selected
         "Your strength is increased by 3."
         $ stat_str +=1
         call stat_increase from _call_stat_increase_8
@@ -1380,6 +1431,7 @@ menu:
         call stat_increase from _call_stat_increase_10
         jump room_infirmary_interact
     "Unidentified pill. {i}{color=[check_colo_02]}  (Luck){/i}{/color}":
+        call choice_selected
         call roll_lck from _call_roll_lck_2
         if success == True:
             "{color=[check_colo_01]} Luck check: Success. {/color}\n\n All your stats are increased by 1."
@@ -1405,7 +1457,20 @@ menu:
             call death_check from _call_death_check_9
             jump room_infirmary_interact
     "Nothing.":
+        call choice_selected
         jump room_infirmary_interact
+label bloodstain_03:
+    call walk_01
+    $ event3 = False
+    show mc frontr:
+        xpos 0.22
+        ypos 0.53
+    with dissolve
+    "STAIN ON THE FLOOR" "Is that... {b}{color=[txt_colo_01]}blood{/b}{/color}? {b}{color=[snt_colo_01]} -1 {image=icon_snt} {/b}{/color}"
+    $ stat_snt -=1
+    call snt_loss
+    call death_check
+    jump room_infirmary_interact
 
 # MEDICAL NOTE
 ############################
@@ -1444,7 +1509,7 @@ label medical_note_01_read:
 #############################################################################################
 label closet_01:
     # stop music fadeout 2
-    play ambiance "sfx/amb_steps_01.mp3"
+    play audio "sfx/amb_steps_01.mp3"
     scene black
     with fade
     call room_events_reset
@@ -1536,6 +1601,7 @@ menu:
         call choice_selected
         jump room_closet_interact
     "Open the chest {b}{color=[key_colo_01]} -2 {image=icon_key} {/b}{/color}" if stat_key >=2:
+        call choice_selected
         play audio "sfx/sfx_unlock.mp3"
         pause 0.2
         play audio "sfx/sfx_wood_open_01.mp3"
@@ -1546,13 +1612,17 @@ menu:
 label toolbox_02:
 menu:
     "TOOLBOX""A large crate full of tools. Some of them would make a good improvised weapon."
-    "Search for a light weapon (Uses Dexterity).":
+    "Search for a light, short weapon (Uses Dexterity).":
+        call choice_selected
+        play audio "sfx/sfx_metal_02.mp3"
         $ have_screwdriver = True
         "You find a screwdriver. Long and pointy, it could be used as a weapon."
         jump room_closet_interact
-    "Search for a heavy, weapon (Uses Strenght).":
+    "Search for a long, thin weapon (Uses Perception).":
+        call choice_selected
+        play audio "sfx/sfx_metal_02.mp3"
         $ have_shovel = True
-        "You find a big shovel. It might come in handy..."
+        "You find a pitchfork, for gardening. It might come in handy..."
         jump room_closet_interact
     "Ignore":
         call choice_selected
@@ -1562,7 +1632,7 @@ menu:
 #############################################################################################
 label staircaise_01:
     stop ambiance fadeout 1
-    play ambiance "sfx/amb_steps_01.mp3"
+    play audio "sfx/amb_steps_01.mp3"
     scene black
     with fade
     call room_events_reset
@@ -1571,6 +1641,81 @@ label staircaise_01:
     show mc backr at entrance_slot_01
     with Dissolve(2)
     "You arrive in a staircase."
+jump room_staircase_interact
+label room_staircase_interact:
+ call screen room_staircase_interact
+screen room_staircase_interact:
+ if event1 == True:
+     imagebutton:
+         xpos 0.48
+         ypos 0.57
+         idle "ui/ui_interact_idle.png"
+         hover "ui/ui_interact_hover.png"
+         action Jump("stairs_01")
+         hover_sound "sfx/sfx_ui_hover_01.mp3"
+         activate_sound "sfx/sfx_ui_select_01.mp3"
+ if event2 == True:
+     imagebutton:
+         xpos 0.22
+         ypos 0.22
+         idle "ui/ui_interact_idle.png"
+         hover "ui/ui_interact_hover.png"
+         action Jump("window_03")
+         hover_sound "sfx/sfx_ui_hover_01.mp3"
+         activate_sound "sfx/sfx_ui_select_01.mp3"
+label stairs_01:
+    call walk_01
+    pause 0.2
+    play audio "sfx/sfx_wood_creak_01.mp3"
+    $ event1 = False
+    show mc backr:
+        xpos 0.32
+        ypos 0.52
+    with dissolve
+menu:
+
+    "STAIRS" "The staircase to the first floor. It's pitch-dark, and the steps look uneven and dangerously dilapidated."
+    "Go down into the darkness.{i}{color=[check_colo_02]}  (Perception){/i}{/color}":
+        call choice_selected
+        hide mc
+        with dissolve
+        call roll_mnd
+        if success == True:
+            play audio "sfx/sfx_wood_creak_01.mp3" volume 0.4
+            play audio "sfx/sfx_steps_02.mp3"
+            "{color=[check_colo_01]} Perception check: Success. {/color}\n\n You descend with precaution, and arrive on the lower floor."
+            jump exit_01
+        else:
+            play audio "sfx/sfx_falling_stairs_01.mp3"
+            "{color=[check_colo_01]} Perception check: Failure. {/color} \n\n You stumble and fall down the stairs.{b}{color=[hlt_colo_01]}-2 {image=icon_hlt} {/b}{/color}"
+            call hlt_loss
+            $ stat_hlt -= 2
+            call death_check
+            pause 1
+            jump exit_01
+    "Light your way down. {b}{color=[fir_colo_01]} -1 {image=icon_fir} {/b}{/color}" if stat_fir>0:
+        call choice_selected
+        pause 0.2
+        play audio "sfx/sfx_match_use_01.mp3"
+        $stat_fir -=1
+        hide mc
+        with dissolve
+        pause 0.1
+        play audio "sfx/sfx_wood_creak_01.mp3" volume 0.4
+        play audio "sfx/sfx_steps_02.mp3"
+        "With the light of a match, you descend the stairs to the lower floor. "
+        jump exit_01
+label window_03:
+    call walk_01
+    pause 0.2
+    play audio "sfx/sfx_wood_creak_01.mp3"
+    $ event2 = False
+    show mc backl:
+        xpos 0.2
+        ypos 0.32
+    with dissolve
+    "WINDOW" "The boards barricading the window {b}{color=[txt_colo_01]}won't budge{/b}{/color}."
+    jump room_staircase_interact
 #############################################################################################
 # STAR ROOM
 #############################################################################################
@@ -1673,8 +1818,23 @@ label exit_01:
     show mc backr at entrance_slot_01
     with Dissolve(2)
     "You arrive in the entrance hall.\n\n You see the large doors leading to the {b}{color=[txt_colo_01]}outside{/b}{/color}, and through the filthy glass, the sun's rays.\n\n  Freedom.\n\n {b}{color=[txt_colo_01]}The exit{/b}{/color}."
+label room_exit_interact1:
+ call screen room_exit_interact1
+screen room_exit_interact1:
+  imagebutton:
+     xpos 0.55
+     ypos 0.82
+     idle "ui/ui_exit_idle.png"
+     hover "ui/ui_exit_hover.png"
+     action Jump("confrontation_01")
+     hover_sound "sfx/sfx_ui_hover_01.mp3"
+     activate_sound "sfx/sfx_steps_02.mp3"
 label confrontation_01:
     stop music fadeout 2
+    show mc backr:
+        xpos 0.32
+        ypos 0.51
+    with Dissolve(2)
     play audio "sfx/sfx_steps_03.mp3"
     pause 0.2
     play music "mus/mus_npc_01.mp3"
@@ -1699,24 +1859,28 @@ label confrontation_02:
     \n\nI had to make sure you {b}{color=[txt_colo_01]}didn't find out too much{/b}{/color} about the town's dirty little secrets.
     \n\nAnd the answer is..."
     if stat_knw <3:
-        a"{color=[check_colo_01]}(Your secret knowledge score is [stat_knw]/XX){/color}
+        a"{color=[check_colo_01]}(Your secret knowledge score is [stat_knw]/7){/color}
         \n\nThat {b}{color=[txt_colo_01]}you know nothing{/b}{/color}. Which is very smart of you.
         \n\n{b}{color=[txt_colo_01]}Curiosity kills the cat{/b}{/color}, as they say."
         jump confrontation_02a
     else:
-        a"{color=[check_colo_01]}(Your secret knowledge score is [stat_knw]/XX){/color}
+        a"{color=[check_colo_01]}(Your secret knowledge score is [stat_knw]/7){/color}
         \n\n{b}{color=[txt_colo_01]}You know too much{/b}{/color}.
         \n\nWhy dig up the town's {b}{color=[txt_colo_01]}old secrets{/b}{/color}? \n\n You should have left us alone. I can't let you go.  "
         jump confrontation_02b
 label confrontation_02a:
-    a"So, if you can find it in your heart to forgive me for my past rudeness, let's put the past behind us, and {b}{color=[txt_colo_01]}part ways here{/b}{/color}."
+    $ event1 = False
+    $ ending = 1
+    a"You're no danger to us. And I have no reason to be a danger to you.\n\n So, let's put the past behind us, and {b}{color=[txt_colo_01]}part ways here{/b}{/color}."
     a"{b}{color=[txt_colo_01]}You're free to go{/b}{/color}. Goodbye.\n\n Oh and of course..."
     a"{b}{color=[txt_colo_01]}NEVER COME BACK!{/b}{/color}"
     stop ambiance fadeout 3
     play audio "sfx/sfx_steps_03.mp3"
     hide npc1
     with dissolve
-    ".."
+    "Before you can do anything, the strange man flees, disappearing forever into the school corridors."
+    play music "mus/mus_mainmenu_01.mp3" fadeout 0.5
+    jump room_exit_interact2
 label confrontation_02b:
 menu:
     a"You should have known that {b}{color=[txt_colo_01]}curiosity kills the cat{/b}{/color}.
@@ -1745,16 +1909,185 @@ label confrontation_04:
     \n\n{b}{color=[txt_colo_01]}The Great Glutton{/b}{/color}.
     \n\nThe last inhabitant of the town. Who will have the flower all within him hehehe.\n\n
     ALL ITS POWER!"
+    stop ambiance fadeout 1
     play music "mus/mus_npc_tension_01.mp3"
-menu:
+    jump npc1_fight_01
+label npc1_fight_01:
     a"AND I WON'T LET ANYONE RUIN THIS VIRTUOUS CIRCLE BY STICKING THEIR NOSE IN OUR BUSINESS!!!"
-    "Attack him with your fists. {i}{color=[check_colo_02]}  (Strenght){/i}{/color}":
-        "d"
-    "Attack him with your shovel. {i}{color=[check_colo_02]}  (Strenght){/i}{/color}" if have_shovel == True:
-        "d"
-    "Attack him with your screwdriver. {i}{color=[check_colo_02]}  (Dexterity){/i}{/color}" if have_screwdriver == True:
-        "d"
+menu:
+    "He's getting ready to leap out at you."
+    "Evade the attack. {i}{color=[check_colo_02]}  (Perception){/i}{/color}":
+        call choice_selected
+        call roll_mnd
+        if success == True:
+            "{color=[check_colo_01]} Perception check: Success. {/color}\n\n You evade the attack."
+            jump npc1_fight_02
+        else:
+            "{color=[check_colo_01]} Perception check: Failure. {/color} \n\n His attack hits you with full force. {b}{color=[hlt_colo_01]}-3 {image=icon_hlt} {/b}{/color}"
+            call hlt_loss
+            $ stat_hlt -= 3
+            call death_check
+            jump npc1_fight_02
+    "Block the attack. {i}{color=[check_colo_02]}  (Strenght){/i}{/color}":
+        call choice_selected
+        call roll_str
+        if success == True:
+            "{color=[check_colo_01]} Strength check: Success. {/color}\n\n You evade the attack.  "
+            jump npc1_fight_02
+        else:
+            "{color=[check_colo_01]} Strength check: Failure. {/color} \n\n His attack hits you with full force. {b}{color=[hlt_colo_01]}-3 {image=icon_hlt} {/b}{/color}"
+            call hlt_loss
+            $ stat_hlt -= 3
+            call death_check
+            jump npc1_fight_02
+    "Hope he misses. {i}{color=[check_colo_02]}  (Luck){/i}{/color}":
+        call choice_selected
+        call roll_lck
+        if success == True:
+            "{color=[check_colo_01]} Luck check: Success. {/color}\n\n He stumbles and his attack narrowly misses you.  "
+            jump npc1_fight_02
+        else:
+            "{color=[check_colo_01]} Luck check: Failure. {/color} \n\n His attack hits you with full force. {b}{color=[hlt_colo_01]}-3 {image=icon_hlt} {/b}{/color}"
+            call hlt_loss
+            $ stat_hlt -= 3
+            call death_check
+            jump npc1_fight_02
 
+label npc1_fight_02:
+menu:
+    a"You little brat... \n\n I should have {b}{color=[txt_colo_01]}finished the job{/b}{/color} when I had the chance."
+    "Attack him with your fists. {i}{color=[check_colo_02]}  (Strenght){/i}{/color}":
+        call choice_selected
+        call roll_str
+        if success == True:
+            "{color=[check_colo_01]} Strength check: Success. {/color}
+            \n\n You jump on him and begin to pummel him furiously, until he collapses to the ground."
+            jump npc1_fight_05
+        else:
+            "{color=[check_colo_01]} Strength check: Failure. {/color}
+            \n\n You jump at him, but the {b}{color=[txt_colo_01]}weakness{/b}{/color} of your blow has {b}{color=[txt_colo_01]}little effect{/b}{/color}.
+            \n\nThe stranger isn't hurt, but you can feel his anger behind his mask."
+            jump npc1_fight_03
+
+    "Attack him with your pitchfork. {i}{color=[check_colo_02]}  (Perception){/i}{/color}" if have_shovel == True:
+        call choice_selected
+        call roll_mnd
+        if success == True:
+            "{color=[check_colo_01]} Perception check: Success. {/color}\n\n You use the length of the pitchfork to attack him, keeping your distance, and with one great thrust, drive the spikes of your weapon into his stomach."
+            jump npc1_fight_05
+        else:
+            "{color=[check_colo_01]} Perception check: Failure. {/color}\n\n You use the length of the fork to attack him, keeping your distance, but don't find the opportunity to attack."
+            jump npc1_fight_03
+    "Attack him with your screwdriver. {i}{color=[check_colo_02]}  (Dexterity){/i}{/color}" if have_screwdriver == True:
+        call choice_selected
+        call roll_dex
+        if success == True:
+            "{color=[check_colo_01]} Strength check: Success. {/color}
+            \n\nWith the energy of desperation, you leap at him, screaming, and drive your screwdriver through his neck."
+            jump npc1_fight_05
+        else:
+            "{color=[check_colo_01]} Strength check: Failure. {/color}
+            \n\n You miss your attack.
+            \n\nThe stranger isn't hurt, but you can feel his anger behind his mask."
+            jump npc1_fight_03
+
+label npc1_fight_03:
+menu:
+    a"TAKE THAT!!!"
+    "Evade the attack. {i}{color=[check_colo_02]}  (Perception){/i}{/color}":
+        call choice_selected
+        call roll_mnd
+        if success == True:
+            "{color=[check_colo_01]} Perception check: Success. {/color}\n\n You evade the attack.  "
+            jump npc1_fight_04
+        else:
+            "{color=[check_colo_01]} Perception check: Failure. {/color} \n\n His attack hits you with full force. {b}{color=[hlt_colo_01]}-3 {image=icon_hlt} {/b}{/color}"
+            call hlt_loss
+            $ stat_hlt -= 3
+            call death_check
+            jump npc1_fight_04
+    "Block the attack. {i}{color=[check_colo_02]}  (Strenght){/i}{/color}":
+        call choice_selected
+        call roll_str
+        if success == True:
+            "{color=[check_colo_01]} Strength check: Success. {/color}\n\n You evade the attack.  "
+            jump npc1_fight_04
+        else:
+            "{color=[check_colo_01]} Strength check: Failure. {/color} \n\n His attack hits you with full force. {b}{color=[hlt_colo_01]}-3 {image=icon_hlt} {/b}{/color}"
+            call hlt_loss
+            $ stat_hlt -= 3
+            call death_check
+            jump npc1_fight_04
+    "Hope he misses. {i}{color=[check_colo_02]}  (Luck){/i}{/color}":
+        call choice_selected
+        call roll_lck
+        if success == True:
+            "{color=[check_colo_01]} Luck check: Success. {/color}\n\n He stumbles and his attack narrowly misses you.  "
+            jump npc1_fight_04
+        else:
+            "{color=[check_colo_01]} Luck check: Failure. {/color} \n\n His attack hits you with full force. {b}{color=[hlt_colo_01]}-3 {image=icon_hlt} {/b}{/color}"
+            call hlt_loss
+            $ stat_hlt -= 3
+            call death_check
+            jump npc1_fight_04
+label npc1_fight_04:
+menu:
+    a"The power of flowers flows through me, you don't stand a chance!"
+    "Attack him with your fists. {i}{color=[check_colo_02]}  (Strenght){/i}{/color}":
+        call choice_selected
+        "{color=[check_colo_01]} Strength check: Success. {/color}
+        \n\nYou jump on him and begin to pummel him furiously, until he collapses to the ground."
+        jump npc1_fight_05
+    "Attack him with your pitchfork. {i}{color=[check_colo_02]}  (Perception){/i}{/color}" if have_shovel == True:
+        call choice_selected
+        "{color=[check_colo_01]} Perception check: Success. {/color}\n\n You use the length of the pitchfork to attack him, keeping your distance, and with one great thrust, drive the spikes of your weapon into his stomach."
+        jump npc1_fight_05
+    "Attack him with your screwdriver. {i}{color=[check_colo_02]}  (Dexterity){/i}{/color}" if have_screwdriver == True:
+        call choice_selected
+        "{color=[check_colo_01]} Strength check: Success. {/color}
+        \n\nWith the energy of desperation, you leap at him, screaming, and drive your screwdriver through his neck."
+        jump npc1_fight_05
+label npc1_fight_05:
+    play audio "sfx/sfx_attack_01.mp3"
+    play audio "sfx/sfx_hurt_02.mp3"
+    show npc1 hurt
+    with dissolve
+    a"AAAAARG."
+    stop music fadeout 2
+    show npc1 dead behind mc:
+        xpos 0.38
+        ypos 0.5
+    with dissolve
+    a"My precious petals... How can this be?\n\n I've eaten so much... Eaten so much..."
+    $ ending = 2
+    play music "mus/mus_mainmenu_01.mp3" fadeout 1
+    # a"Please, the power must be preserved... Devour my flesh... \n\n So that the magic may continue through you..."
+label room_exit_interact2:
+
+    call screen room_exit_interact2
+screen room_exit_interact2:
+ if event1 == True:
+     imagebutton:
+         xpos 0.43
+         ypos 0.6
+         idle "ui/ui_interact_idle.png"
+         hover "ui/ui_interact_hover.png"
+         action Jump("npc1_corpse_01")
+         hover_sound "sfx/sfx_ui_hover_01.mp3"
+         activate_sound "sfx/sfx_ui_select_01.mp3"
+ imagebutton:
+     xpos 0.55
+     ypos 0.82
+     idle "ui/ui_exit_idle.png"
+     hover "ui/ui_exit_hover.png"
+     action Jump("outdoor_01")
+     hover_sound "sfx/sfx_ui_hover_01.mp3"
+     activate_sound "sfx/sfx_steps_02.mp3"
+
+label npc1_corpse_01:
+    $ event1 = False
+    a"He's dead."
+    jump room_exit_interact2
 #############################################################################################
 # OUTDOOR
 #############################################################################################
@@ -1763,7 +2096,7 @@ label outdoor_01:
     with fade
     play audio "sfx/sfx_steps_01.mp3"
     pause 0.1
-    play music "mus/mus_mainmenu_01.mp3" fadeout 0.5
+    # play music "mus/mus_mainmenu_01.mp3" fadeout 0.5
     call room_events_reset
     scene bgoutdoor_01
     show mc frontr:
@@ -1772,8 +2105,14 @@ label outdoor_01:
     with Dissolve(2)
     pause 1
     "You feel the air on your face as you gaze out over the schoolyard. \n\n Congratulations, you've survived this terrible journey."
-    "YOU GOT ENDING 1/X
-    \n\n \"Safe and Sound.\""
+    if ending == 1:
+        play audio "sfx/sfx_impact_01.mp3"
+        "YOU GOT ENDING 1/2
+        \n\n \"Blessed is the ignorant\""
+    if ending == 2:
+        play audio "sfx/sfx_impact_01.mp3"
+        "YOU GOT ENDING 2/2
+        \n\n \"Fighting your way out\""
     jump credits_01
 label credits_01:
         "CREDITS""Thank you so much for playing!
@@ -1808,10 +2147,12 @@ label gameover_hlt:
     "Your body is {b}{color=[hlt_colo_01]}too bruised and tired{/b}{/color} to go on, and you collapse to the ground.
     \n\nYou haven't managed to escape from the school, and perhaps haven't discovered all its {b}{color=[txt_colo_01]}secrets {/b}{/color}...
     \n\n{color=[check_colo_01]}Click to go back to main menu.{/color}"
-
     jump end
     # This ends the game.
 label end:
+    hide screen stats_UI
+    with dissolve
     scene black
     with fade
+    pause 1
     $ renpy.full_restart()
