@@ -384,7 +384,7 @@ screen room_01_interact:
         # activate_sound "sfx/sfx_ui_select_01.mp3"
         activate_sound "sfx/sfx_steps_02.mp3"
 label star_found_01:
-    call star_found
+    call star_found from _call_star_found
     jump room_01_interact
 ############################
 label first_window:
@@ -619,7 +619,7 @@ screen room_03_interact:
         activate_sound "sfx/sfx_steps_02.mp3"
 #################################
 label star_found_03:
-    call star_found
+    call star_found from _call_star_found_1
     jump room_03_interact
 
 label newspapers_01:
@@ -899,7 +899,7 @@ screen room_04_interact:
         activate_sound "sfx/sfx_steps_02.mp3"
 #################################
 label star_found_02:
-    call star_found
+    call star_found from _call_star_found_2
     jump room_04_interact
 
 label cigarette_case_01:
@@ -1199,10 +1199,12 @@ label hidden_trapdoor_03:
 menu:
     "HIDDEN PASSAGE""A narrow passage to a room beneath your feet.\n\n It's too dark to see what's awaiting you."
     "Go down":
+        call choice_selected from _call_choice_selected_48
         play audio "sfx/sfx_wood_creak_01.mp3"
         show bgbotanic_C
         jump stardoor_01
     "Ignore":
+        call choice_selected from _call_choice_selected_49
         jump room_botanic_interact3
 
 #############################################################################################
@@ -1365,7 +1367,7 @@ screen room_infirmary_interact:
          activate_sound "sfx/sfx_steps_02.mp3"
 
 label star_found_04:
-    call star_found
+    call star_found from _call_star_found_3
     jump room_infirmary_interact
 #############################################################################################
 # DARK CORNER
@@ -1407,6 +1409,7 @@ menu:
             $ stat_key += 1
             jump room_infirmary_interact
     "Ignore":
+        call choice_selected from _call_choice_selected_50
         jump room_infirmary_interact
 
 #############################################################################################
@@ -1842,7 +1845,7 @@ menu:
     b"You can {b}{color=[txt_colo_01]}stay here{/b}{/color}. \nSmell the flowers for eternity, and open your mind to {b}{color=[txt_colo_01]}all the secrets of the universe{/b}{/color}.
     \n\nOr you can return to your world as {b}{color=[txt_colo_01]}a Herald {/b}{/color}, and {b}{color=[txt_colo_01]}punish {/b}{/color} those who have perverted the very essence of flowers, rectifying the balance of the universe."
     "{i}\"I want to stay here.\"{/i}":
-        call choice_selected
+        call choice_selected from _call_choice_selected_46
         "So be it. \n\nWelcome home."
         show black
         hide screen stats_UI
@@ -1853,7 +1856,7 @@ menu:
         \n\n \"One with the flowers\""
         jump credits_01
     "{i}\"I will be your Herald.\"{/i}":
-        call choice_selected
+        call choice_selected from _call_choice_selected_47
         b"Thank you. \n\nMay your blade guide you, Herald."
         $ ending = 3
         $ ending_locked = True
