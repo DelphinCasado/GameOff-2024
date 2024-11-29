@@ -58,7 +58,7 @@ define gui.about = _p("""
 ## distribution. This must be ASCII-only, and must not contain spaces, colons,
 ## or semicolons.
 
-define build.name = "Where Dogs Taste Like Flowers"
+define build.name = "WhereDogsTasteLikeFlowers"
 
 ###################
 #MOUSE CURSOR
