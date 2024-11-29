@@ -124,7 +124,7 @@ screen stats_UI:
         hbox:
             spacing 10
             vbox:
-                text "Strenght"
+                text "Strength"
                 text "Perception"
                 text "Dexterity"
                 text "Luck"
@@ -233,7 +233,7 @@ style say_label:
 
 style say_dialogue:
     properties gui.text_properties("dialogue")
-
+    # xpadding 30
     xpos 1530
     xsize 560
     ypos -665
