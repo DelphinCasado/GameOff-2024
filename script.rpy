@@ -136,7 +136,7 @@ default ending_locked = False
 ############### GAME START #############################
 ########################################################
 label start:
-    # $ config.rollback_enabled = False
+    $ config.rollback_enabled = False
     # scene black
     # pause 2
     #scene bgmovie
