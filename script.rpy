@@ -919,6 +919,7 @@ menu:
             "{color=[check_colo_01]} Luck check: Success. {/color}\n\n
             It relaxes you… {b}{color=[snt_colo_01]} +3 {image=icon_snt} {/b}{/color}"
             $ stat_snt +=3
+            call snt_gain from _call_snt_gain_2
             jump room_04_interact
         else:
             "{color=[check_colo_01]} Luck check: Failure.{/color}\n\n
@@ -1078,13 +1079,14 @@ menu:
     \n\nBut the pot is full of dry, {b}{color=[txt_colo_01]}thorn-covered brambles{/b}{/color} and {b}{color=[txt_colo_01]}wriggling maggots{/b}{/color}."
     "Take the key. {b}{color=[hlt_colo_01]}-2 {image=icon_hlt}{/b}{/color}{b}{color=[snt_colo_01]} -1 {image=icon_snt} {/b}{/color}{b}{color=[key_colo_01]} +1 {image=icon_key} {/b}{/color}":
         call choice_selected from _call_choice_selected_15
-        $ stat_key +=1
         $ stat_hlt -=2
         call hlt_loss from _call_hlt_loss
         $ stat_snt -=1
         call snt_loss from _call_snt_loss_5
         call death_check from _call_death_check
         pause 0.2
+        $ stat_key +=1
+        call key_gain from _call_key_gain_2
         play audio "sfx/sfx_key_01.mp3"
         jump room_botanic_interact
     "Ignore.":
